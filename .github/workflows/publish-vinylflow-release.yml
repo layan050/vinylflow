@@ -3,7 +3,7 @@ name: Publish VinylFlow APKs
 on:
   push:
     tags:
-      - v1.4.1
+      - v1.4.2
 
 permissions:
   contents: write
@@ -23,7 +23,7 @@ jobs:
           set -euo pipefail
           gh release create "$RELEASE_TAG" dist/*.apk \
             --title "VinylFlow $RELEASE_TAG" \
-            --notes "VinylFlow 1.4.1 fixes iPod widget loading by sending a compact album-art thumbnail. Includes all 1.4.0 player and resizable iPod and cassette widget designs, with universal and device-specific APKs for ARM and x86 Android devices."
+            --notes "VinylFlow 1.4.2 fixes iPod and cassette widgets failing to load on launchers by replacing unsupported view elements with RemoteViews-compatible images. Includes universal and device-specific APKs for ARM and x86 Android devices."
           assets="$(gh release view "$RELEASE_TAG" --json assets --jq '.assets[].name')"
           printf '%s\n' "$assets"
           count="$(printf '%s\n' "$assets" | sed '/^$/d' | wc -l)"
