@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.graphics.Bitmap
 import android.graphics.BitmapShader
 import android.graphics.Canvas
@@ -30,9 +31,16 @@ enum class WidgetStyle(
     val controlTint: Int,
     val playTint: Int,
     val recordMode: RecordMode = RecordMode.VINYL,
-    val backgroundView: Int? = null
+    val backgroundView: Int? = null,
+    val compactLayout: Int? = null,
+    val compactWidthDp: Int = 0,
+    val compactHeightDp: Int = 0
 ) {
-    IPOD(R.layout.widget_vinyl_ipod, R.string.widget_ipod_name, 0xFFBFC3CC.toInt(), Color.WHITE, Color.WHITE, RecordMode.ALBUM_ART),
+    IPOD(
+        R.layout.widget_vinyl_ipod, R.string.widget_ipod_name, 0xFFBFC3CC.toInt(), Color.WHITE, Color.WHITE,
+        RecordMode.ALBUM_ART, compactLayout = R.layout.widget_vinyl_ipod_compact,
+        compactWidthDp = 320, compactHeightDp = 135
+    ),
     CASSETTE(R.layout.widget_vinyl_cassette, R.string.widget_cassette_name, 0xFFBFC3CC.toInt(), 0xFF25252A.toInt(), 0xFF17171B.toInt(), RecordMode.NONE),
     STRIP(R.layout.widget_vinyl_strip, R.string.widget_strip_name, 0xFFB6AFFF.toInt(), Color.WHITE, Color.WHITE, RecordMode.VINYL, R.id.widget_background)
 }
@@ -45,6 +53,15 @@ abstract class VinylBaseWidgetProvider : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, appWidgetIds: IntArray) {
         val controller = activeController(context)
         appWidgetIds.forEach { updateWidget(context, manager, it, widgetStyle, controller) }
+    }
+
+    override fun onAppWidgetOptionsChanged(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int,
+        newOptions: Bundle
+    ) {
+        updateWidget(context, appWidgetManager, appWidgetId, widgetStyle, activeController(context))
     }
 
     companion object {
@@ -90,7 +107,14 @@ abstract class VinylBaseWidgetProvider : AppWidgetProvider() {
             rotationDegrees: Float = currentRotation(),
             spinningOnly: Boolean = false
         ) {
-            val views = RemoteViews(context.packageName, style.layout)
+            val options = manager.getAppWidgetOptions(id)
+            val width = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0)
+            val height = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0)
+            val compactLayout = style.compactLayout
+            val layout = if (compactLayout != null &&
+                (width < style.compactWidthDp || height < style.compactHeightDp)
+            ) compactLayout else style.layout
+            val views = RemoteViews(context.packageName, layout)
             if (spinningOnly && style.recordMode == RecordMode.VINYL) {
                 val metadata = controller?.metadata
                 views.setImageViewBitmap(R.id.widget_record, createSpinningRecord(metadata?.let {

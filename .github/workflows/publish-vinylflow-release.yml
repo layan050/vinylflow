@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - v1.5.0
+      - v1.5.0-update*
 
 permissions:
   contents: write
@@ -18,12 +19,18 @@ jobs:
       - name: Publish all device APKs
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_TAG: v1.5.0
         run: |
           set -euo pipefail
-          gh release create "$RELEASE_TAG" dist/*.apk \
-            --title "VinylFlow $RELEASE_TAG" \
-            --notes "VinylFlow 1.5.0 adds full-bleed album artwork behind the rotating vinyl player, removes the legacy Mini, Cream Player, and Silver Turntable widgets, and introduces smaller iPod and cassette widgets plus a new resizing vinyl strip widget. Includes universal and device-specific APKs for ARM and x86 Android devices."
+          notes="VinylFlow 1.5.0 adds full-bleed album artwork behind the rotating vinyl player and removes the legacy widgets. This APK update (build 9) enlarges the album cover and track details in the full-size iPod widget, adds a more compact iPod size, and replaces the APK assets on this release page. Also includes a cassette widget and rotating vinyl strip."
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" dist/*.apk --clobber
+            gh release edit "$RELEASE_TAG" --title "VinylFlow $RELEASE_TAG" --notes "$notes"
+          else
+            gh release create "$RELEASE_TAG" dist/*.apk \
+              --title "VinylFlow $RELEASE_TAG" \
+              --notes "$notes"
+          fi
           assets="$(gh release view "$RELEASE_TAG" --json assets --jq '.assets[].name')"
           printf '%s\n' "$assets"
           count="$(printf '%s\n' "$assets" | sed '/^$/d' | wc -l)"
