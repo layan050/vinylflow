@@ -110,7 +110,13 @@ abstract class VinylBaseWidgetProvider : AppWidgetProvider() {
                 ?: metadata?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
             when (style.recordMode) {
                 RecordMode.VINYL -> views.setImageViewBitmap(R.id.widget_record, createSpinningRecord(artwork, rotationDegrees, style.accent))
-                RecordMode.ALBUM_ART -> if (artwork != null && !artwork.isRecycled) views.setImageViewBitmap(R.id.widget_record, artwork) else views.setImageViewResource(R.id.widget_record, android.R.drawable.ic_menu_gallery)
+                RecordMode.ALBUM_ART -> if (artwork != null && !artwork.isRecycled) {
+                    // Media apps often expose multi-megabyte covers. Keep RemoteViews
+                    // below Binder's transaction limit by sending a small square crop.
+                    views.setImageViewBitmap(R.id.widget_record, createAlbumThumbnail(artwork))
+                } else {
+                    views.setImageViewResource(R.id.widget_record, android.R.drawable.ic_menu_gallery)
+                }
                 RecordMode.NONE -> Unit
             }
 
@@ -141,6 +147,23 @@ abstract class VinylBaseWidgetProvider : AppWidgetProvider() {
         }
 
         private fun currentRotation(): Float = (SystemClock.elapsedRealtime() * 0.12f) % 360f
+
+        private fun createAlbumThumbnail(artwork: Bitmap, side: Int = 192): Bitmap {
+            val cropSide = minOf(artwork.width, artwork.height).coerceAtLeast(1)
+            val crop = if (artwork.width == cropSide && artwork.height == cropSide) artwork else {
+                Bitmap.createBitmap(
+                    artwork,
+                    (artwork.width - cropSide) / 2,
+                    (artwork.height - cropSide) / 2,
+                    cropSide,
+                    cropSide
+                )
+            }
+            val thumbnail = if (crop.width == side && crop.height == side) crop
+                else Bitmap.createScaledBitmap(crop, side, side, true)
+            if (crop !== artwork && crop !== thumbnail && !crop.isRecycled) crop.recycle()
+            return thumbnail
+        }
 
         private fun openApp(context: Context): PendingIntent = PendingIntent.getActivity(
             context, 0, Intent(context, MainActivity::class.java),
