@@ -20,6 +20,7 @@ data class VinylTheme(
     val showToneArm: Boolean = true,
     val toneArmColor: Long = 0xFFB0B8C8L,
     val backgroundColor: Long = 0xFF351D20L,
+    val darkMode: Boolean = true,
     val accentColor: Long = 0xFFD97847L,
     val showArtwork: Boolean = true,
     val showTrackInfo: Boolean = true,

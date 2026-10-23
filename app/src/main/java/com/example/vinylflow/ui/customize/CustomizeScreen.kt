@@ -131,6 +131,16 @@ fun CustomizeScreen(
                     )
                 }
 
+                item {
+                    SectionHeader("Player Background")
+                    ColorPicker(
+                        colors = listOf(0xFFF0F1EFL, 0xFFE8E2D8L, 0xFFE2E8F0L, 0xFFE7DDEBL, 0xFF17171CL, 0xFF201A2BL, 0xFF132128L, 0xFF24191BL),
+                        selected = theme.backgroundColor,
+                        onSelect = { theme = theme.copy(backgroundColor = it, darkMode = it < 0xFF800000L, preset = ThemePreset.CUSTOM) }
+                    )
+                    ToggleRow("Dark mode", theme.darkMode) { theme = theme.copy(darkMode = it, preset = ThemePreset.CUSTOM) }
+                }
+
                 // Toggles
                 item {
                     SectionHeader("Options")

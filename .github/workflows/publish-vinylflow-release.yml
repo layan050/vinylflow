@@ -3,7 +3,7 @@ name: Publish VinylFlow APKs
 on:
   push:
     tags:
-      - v1.2.0
+      - v1.3.0
 
 permissions:
   contents: write
@@ -23,7 +23,7 @@ jobs:
           set -euo pipefail
           gh release create "$RELEASE_TAG" dist/*.apk \
             --title "VinylFlow $RELEASE_TAG" \
-            --notes "VinylFlow 1.2.0 adds three home-screen widget styles (Mini Violet, Player Cream, and Silver Turntable), adjustable launcher sizes, and a spinning vinyl. The phone and tablet player now follows the supplied turntable references."
+            --notes "VinylFlow 1.3.0 adds a custom turntable app icon, saved dark mode and player background color choices, plus a refreshed player and widget design. Includes universal and device-specific APKs for ARM and x86 Android devices."
           assets="$(gh release view "$RELEASE_TAG" --json assets --jq '.assets[].name')"
           printf '%s\n' "$assets"
           count="$(printf '%s\n' "$assets" | sed '/^$/d' | wc -l)"

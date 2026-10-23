@@ -99,16 +99,14 @@ private fun VinylPlayerConsole(
 ) {
     val track = state.track
     val accent = Color(theme.accentColor)
-    val ink = Color(0xFF24252B)
-    val muted = Color(0xFF777981)
+    val ink = if (theme.darkMode) Color(0xFFF3F1F5) else Color(0xFF24252B)
+    val muted = if (theme.darkMode) Color(0xFFB6B2BC) else Color(0xFF777981)
 
     Box(
         Modifier
             .fillMaxSize()
             .background(
-                Brush.verticalGradient(
-                    listOf(Color(0xFFECEDEF), Color(0xFFF8F8F6), Color(0xFFE3F0E4))
-                )
+                Brush.verticalGradient(if (theme.darkMode) listOf(Color(0xFF17171C), Color(0xFF22222A), Color(0xFF151519)) else listOf(Color(theme.backgroundColor), Color(theme.backgroundColor).copy(alpha = 0.92f), Color(theme.backgroundColor).copy(alpha = 0.78f)))
             )
     ) {
         Column(
@@ -142,7 +140,7 @@ private fun VinylPlayerConsole(
                     Row(
                         modifier = Modifier
                             .clip(RoundedCornerShape(30.dp))
-                            .background(Color.White.copy(alpha = 0.78f))
+                            .background(if (theme.darkMode) Color.White.copy(alpha = 0.12f) else Color.White.copy(alpha = 0.78f))
                             .clickable(onClick = onOpenSources)
                             .padding(horizontal = 12.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -169,7 +167,7 @@ private fun VinylPlayerConsole(
                     .clip(RoundedCornerShape(30.dp))
                     .background(
                         Brush.linearGradient(
-                            listOf(Color(0xFFF5F5F4), Color(0xFFD7D9DC), Color(0xFFBFC2C6))
+                            if (theme.darkMode) listOf(Color(0xFF42434A), Color(0xFF292A30), Color(0xFF1F2025)) else listOf(Color(0xFFF5F5F4), Color(0xFFD7D9DC), Color(0xFFBFC2C6))
                         )
                     )
                     .border(1.dp, Color.White.copy(alpha = 0.88f), RoundedCornerShape(30.dp)),
@@ -188,7 +186,7 @@ private fun VinylPlayerConsole(
                         .fillMaxWidth(0.84f)
                         .aspectRatio(1f)
                         .shadow(15.dp, CircleShape)
-                        .background(Color(0xFFB2B5B9), CircleShape)
+                        .background(if (theme.darkMode) Color(0xFF25262B) else Color(0xFFB2B5B9), CircleShape)
                         .padding(5.dp),
                     contentAlignment = Alignment.Center
                 ) {

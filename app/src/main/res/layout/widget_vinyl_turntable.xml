@@ -6,7 +6,7 @@
     android:background="@drawable/widget_panel_silver"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:padding="12dp">
+        android:padding="14dp">
 
     <TextView
         android:id="@+id/widget_source"
@@ -50,13 +50,13 @@
         <ImageView
             android:id="@+id/widget_record"
             android:layout_width="188dp"
-            android:layout_height="188dp"
+        android:layout_height="204dp"
             android:layout_gravity="center"
             android:contentDescription="Spinning vinyl with album art" />
 
         <ImageView
-            android:layout_width="208dp"
-            android:layout_height="208dp"
+        android:layout_width="224dp"
+        android:layout_height="224dp"
             android:layout_gravity="center"
             android:contentDescription="Turntable tonearm"
             android:src="@drawable/widget_tonearm" />

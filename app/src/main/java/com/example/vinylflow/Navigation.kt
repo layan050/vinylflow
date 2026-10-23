@@ -15,6 +15,11 @@ import com.example.vinylflow.ui.player.PlayerScreen
 import com.example.vinylflow.ui.player.TabletPlayerScreen
 import com.example.vinylflow.ui.settings.SettingsScreen
 import com.example.vinylflow.ui.sources.SourcesScreen
+import com.example.vinylflow.theme.VinylFlowTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
 import kotlinx.serialization.Serializable
 
 // ── Nav Destinations — must implement NavKey ──────────────────────────────────
@@ -33,12 +38,20 @@ sealed interface Dest : NavKey {
 @Composable
 fun MainNavigation(activity: android.app.Activity) {
     val backStack = rememberNavBackStack(Dest.Player)
-    var theme by remember { mutableStateOf(PRESET_VINTAGE_CREAM) }
+    val prefs = remember { activity.getSharedPreferences("vinylflow_appearance", android.content.Context.MODE_PRIVATE) }
+    var theme by remember {
+        mutableStateOf(PRESET_VINTAGE_CREAM.copy(
+            backgroundColor = prefs.getLong("background", PRESET_VINTAGE_CREAM.backgroundColor),
+            darkMode = prefs.getBoolean("dark", false)
+        ))
+    }
 
     // Auto-detect tablet (Xiaomi Pad 7 → Expanded width in landscape)
     val windowSizeClass = calculateWindowSizeClass(activity)
     val isTablet = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
 
+    VinylFlowTheme(darkMode = theme.darkMode) {
+    Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
     NavDisplay(
         backStack = backStack,
         onBack    = { backStack.removeLastOrNull() },
@@ -71,6 +84,8 @@ fun MainNavigation(activity: android.app.Activity) {
                     currentTheme  = theme,
                     onThemeChange = { newTheme ->
                         theme = newTheme
+                        prefs.edit().putLong("background", newTheme.backgroundColor)
+                            .putBoolean("dark", newTheme.darkMode).apply()
                         backStack.removeLastOrNull()
                     },
                     onBack = { backStack.removeLastOrNull() }
@@ -82,4 +97,6 @@ fun MainNavigation(activity: android.app.Activity) {
             }
         }
     )
+    }
+    }
 }

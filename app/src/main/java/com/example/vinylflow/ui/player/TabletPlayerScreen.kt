@@ -46,9 +46,9 @@ fun TabletPlayerScreen(
             .background(
                 Brush.linearGradient(
                     colors = listOf(
-                        Color(0xFFECEDEF),
-                        Color(0xFFF8F8F6),
-                        Color(0xFFE3F0E4)
+                        if (theme.darkMode) Color(0xFF17171C) else Color(theme.backgroundColor),
+                        if (theme.darkMode) Color(0xFF22222A) else Color(theme.backgroundColor).copy(alpha = 0.92f),
+                        if (theme.darkMode) Color(0xFF151519) else Color(theme.backgroundColor).copy(alpha = 0.78f)
                     ),
                     start = androidx.compose.ui.geometry.Offset(0f, 0f),
                     end   = androidx.compose.ui.geometry.Offset(2000f, 1200f)
@@ -100,8 +100,8 @@ private fun TabletMainLayout(
 ) {
     val track  = state.track
     val accent = Color(theme.accentColor)
-    val ink = Color(0xFF292A30)
-    val muted = Color(0xFF747780)
+    val ink = if (theme.darkMode) Color(0xFFF3F1F5) else Color(0xFF292A30)
+    val muted = if (theme.darkMode) Color(0xFFB6B2BC) else Color(0xFF747780)
 
     Row(modifier = Modifier.fillMaxSize()) {
 
@@ -112,7 +112,7 @@ private fun TabletMainLayout(
                 .fillMaxHeight()
                 .padding(34.dp)
                 .clip(androidx.compose.foundation.shape.RoundedCornerShape(34.dp))
-                .background(Brush.linearGradient(listOf(Color(0xFFF4F4F2), Color(0xFFD0D3D6), Color(0xFFBFC2C6)))),
+                .background(Brush.linearGradient(if (theme.darkMode) listOf(Color(0xFF42434A), Color(0xFF292A30), Color(0xFF1F2025)) else listOf(Color(0xFFF4F4F2), Color(0xFFD0D3D6), Color(0xFFBFC2C6)))),
             contentAlignment = Alignment.Center
         ) {
             VinylRecord(
