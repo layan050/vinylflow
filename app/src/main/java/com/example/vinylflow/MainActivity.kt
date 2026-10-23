@@ -11,12 +11,18 @@ import androidx.compose.ui.Modifier
 import com.example.vinylflow.theme.VinylFlowTheme
 
 class MainActivity : ComponentActivity() {
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-
-    enableEdgeToEdge()
-    setContent {
-      VinylFlowTheme { Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) { MainNavigation() } }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            VinylFlowTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color    = MaterialTheme.colorScheme.background
+                ) {
+                    MainNavigation(activity = this)
+                }
+            }
+        }
     }
-  }
 }
