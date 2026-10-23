@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">VinylFlow</string>
-    <string name="widget_description">Vinyl player controls and album art</string>
+    <string name="widget_mini_name">VinylFlow Mini · Violet</string>
+    <string name="widget_mini_description">A compact violet vinyl player with spinning album art and playback controls.</string>
+    <string name="widget_player_name">VinylFlow Player · Cream</string>
+    <string name="widget_player_description">A cream turntable player with track details and music controls. Resize it on your home screen.</string>
+    <string name="widget_turntable_name">VinylFlow Turntable · Silver</string>
+    <string name="widget_turntable_description">A large silver turntable with a spinning vinyl, tonearm and playback controls.</string>
 </resources>

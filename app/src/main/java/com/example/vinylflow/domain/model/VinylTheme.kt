@@ -54,12 +54,12 @@ val PRESET_BURGUNDY = VinylTheme(
 
 val PRESET_VINTAGE_CREAM = VinylTheme(
     preset = ThemePreset.VINTAGE_CREAM,
-    recordColor = 0xFF2A1810L,
-    grooveColor = 0xFF3C2618L,
+    recordColor = 0xFF101114L,
+    grooveColor = 0xFF292B31L,
     labelColor = 0xFFF5E6C8L,
-    toneArmColor = 0xFFD4A853L,
-    backgroundColor = 0xFF190E08L,
-    accentColor = 0xFFF5C842L,
+    toneArmColor = 0xFFD5D7D9L,
+    backgroundColor = 0xFFF0F1EF,
+    accentColor = 0xFF5D57C9L,
     grooveIntensity = 0.7f
 )
 

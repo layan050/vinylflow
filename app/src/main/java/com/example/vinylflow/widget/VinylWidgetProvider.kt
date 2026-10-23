@@ -9,65 +9,108 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapShader
 import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.Paint
-import android.graphics.Rect
 import android.graphics.Shader
+import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
+import android.os.SystemClock
 import android.widget.RemoteViews
 import com.example.vinylflow.MainActivity
 import com.example.vinylflow.R
 import com.example.vinylflow.media.VinylNotificationListenerService
 
-/** A real launcher widget, backed by Android media sessions. */
-class VinylWidgetProvider : AppWidgetProvider() {
+enum class WidgetStyle(
+    val layout: Int,
+    val label: Int,
+    val accent: Int,
+    val controlTint: Int,
+    val playTint: Int
+) {
+    MINI(R.layout.widget_vinyl_mini, R.string.widget_mini_name, 0xFF6055C8.toInt(), 0xFF4942A9.toInt(), Color.WHITE),
+    PLAYER(R.layout.widget_vinyl, R.string.widget_player_name, 0xFFE58350.toInt(), 0xFF59483E.toInt(), Color.WHITE),
+    TURNTABLE(R.layout.widget_vinyl_turntable, R.string.widget_turntable_name, 0xFF5F62C9.toInt(), 0xFF30323A.toInt(), Color.WHITE)
+}
+
+abstract class VinylBaseWidgetProvider : AppWidgetProvider() {
+    protected abstract val widgetStyle: WidgetStyle
+
     override fun onUpdate(context: Context, manager: AppWidgetManager, appWidgetIds: IntArray) {
-        appWidgetIds.forEach { updateWidget(context, manager, it) }
+        val controller = activeController(context)
+        appWidgetIds.forEach { updateWidget(context, manager, it, widgetStyle, controller) }
     }
 
     companion object {
-        fun updateAll(context: Context) {
+        private val widgetProviders = listOf(
+            VinylMiniWidgetProvider::class.java,
+            VinylPlayerWidgetProvider::class.java,
+            VinylTurntableWidgetProvider::class.java
+        )
+
+        fun hasWidgets(context: Context): Boolean {
             val manager = AppWidgetManager.getInstance(context)
-            val ids = manager.getAppWidgetIds(ComponentName(context, VinylWidgetProvider::class.java))
-            ids.forEach { updateWidget(context, manager, it) }
+            return widgetProviders.any { provider ->
+                manager.getAppWidgetIds(ComponentName(context, provider)).isNotEmpty()
+            }
         }
 
-        private fun updateWidget(context: Context, manager: AppWidgetManager, id: Int) {
-            val views = RemoteViews(context.packageName, R.layout.widget_vinyl)
+        fun updateAll(context: Context, rotationDegrees: Float = currentRotation()) {
+            val manager = AppWidgetManager.getInstance(context)
             val controller = activeController(context)
+            widgetProviders.forEach { provider ->
+                val ids = manager.getAppWidgetIds(ComponentName(context, provider))
+                val style = when (provider) {
+                    VinylMiniWidgetProvider::class.java -> WidgetStyle.MINI
+                    VinylPlayerWidgetProvider::class.java -> WidgetStyle.PLAYER
+                    else -> WidgetStyle.TURNTABLE
+                }
+                ids.forEach { updateWidget(context, manager, it, style, controller, rotationDegrees) }
+            }
+        }
+
+        private fun updateWidget(
+            context: Context,
+            manager: AppWidgetManager,
+            id: Int,
+            style: WidgetStyle,
+            controller: MediaController?,
+            rotationDegrees: Float = currentRotation()
+        ) {
+            val views = RemoteViews(context.packageName, style.layout)
             val metadata = controller?.metadata
-            val state = controller?.playbackState
-            val title = metadata?.getString(android.media.MediaMetadata.METADATA_KEY_TITLE)
+            val playback = controller?.playbackState
+            val title = metadata?.getString(MediaMetadata.METADATA_KEY_TITLE)
                 ?.takeIf(String::isNotBlank)
-            val artist = metadata?.getString(android.media.MediaMetadata.METADATA_KEY_ARTIST)
+            val artist = metadata?.getString(MediaMetadata.METADATA_KEY_ARTIST)
                 ?.takeIf(String::isNotBlank)
-                ?: metadata?.getString(android.media.MediaMetadata.METADATA_KEY_ALBUM_ARTIST)
+                ?: metadata?.getString(MediaMetadata.METADATA_KEY_ALBUM_ARTIST)
                     ?.takeIf(String::isNotBlank)
 
-            views.setTextViewText(R.id.widget_track_title, title ?: "Open a music app")
-            views.setTextViewText(R.id.widget_track_artist, artist ?: "Your record will show here")
+            views.setTextViewText(R.id.widget_track_title, title ?: "Nothing playing")
+            views.setTextViewText(R.id.widget_track_artist, artist ?: "Start music to spin")
             views.setTextViewText(
                 R.id.widget_source,
-                if (controller != null) "NOW SPINNING" else "VINYLFLOW · READY"
+                if (controller != null) "NOW SPINNING" else context.getString(style.label).uppercase()
             )
 
-            val artwork = metadata?.getBitmap(android.media.MediaMetadata.METADATA_KEY_ART)
-                ?: metadata?.getBitmap(android.media.MediaMetadata.METADATA_KEY_ALBUM_ART)
-            if (artwork != null && !artwork.isRecycled) {
-                views.setImageViewBitmap(R.id.widget_artwork, circularArtwork(artwork))
-            } else {
-                views.setImageViewResource(R.id.widget_artwork, R.drawable.widget_artwork_placeholder)
-            }
+            val artwork = metadata?.getBitmap(MediaMetadata.METADATA_KEY_ART)
+                ?: metadata?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
+            views.setImageViewBitmap(
+                R.id.widget_record,
+                createSpinningRecord(artwork, rotationDegrees, style.accent)
+            )
 
-            val isPlaying = state?.state == PlaybackState.STATE_PLAYING
+            val isPlaying = playback?.state == PlaybackState.STATE_PLAYING
             views.setImageViewResource(
                 R.id.widget_play_pause,
                 if (isPlaying) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play
             )
-            views.setInt(R.id.widget_play_pause, "setColorFilter", 0xFFFFF2E4.toInt())
-            views.setInt(R.id.widget_previous, "setColorFilter", 0xFFFFF2E4.toInt())
-            views.setInt(R.id.widget_next, "setColorFilter", 0xFFFFF2E4.toInt())
+            views.setInt(R.id.widget_play_pause, "setColorFilter", style.playTint)
+            views.setInt(R.id.widget_previous, "setColorFilter", style.controlTint)
+            views.setInt(R.id.widget_next, "setColorFilter", style.controlTint)
 
             views.setOnClickPendingIntent(R.id.widget_root, openApp(context))
             views.setOnClickPendingIntent(R.id.widget_previous, action(context, id, VinylWidgetActionReceiver.PREVIOUS))
@@ -86,13 +129,12 @@ class VinylWidgetProvider : AppWidgetProvider() {
             null
         }
 
-        private fun openApp(context: Context): PendingIntent {
-            val intent = Intent(context, MainActivity::class.java)
-            return PendingIntent.getActivity(
-                context, 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-        }
+        private fun currentRotation(): Float = (SystemClock.elapsedRealtime() * 0.12f) % 360f
+
+        private fun openApp(context: Context): PendingIntent = PendingIntent.getActivity(
+            context, 0, Intent(context, MainActivity::class.java),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
 
         private fun action(context: Context, widgetId: Int, name: String): PendingIntent {
             val intent = Intent(context, VinylWidgetActionReceiver::class.java).apply {
@@ -105,33 +147,78 @@ class VinylWidgetProvider : AppWidgetProvider() {
             )
         }
 
-        private fun circularArtwork(source: Bitmap): Bitmap {
-            val side = 144
-            val output = Bitmap.createBitmap(side, side, Bitmap.Config.ARGB_8888)
+        private fun createSpinningRecord(artwork: Bitmap?, degrees: Float, accent: Int): Bitmap {
+            val side = 256
+            val center = side / 2f
+            val record = Bitmap.createBitmap(side, side, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(record)
             val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
-            val shader = BitmapShader(source, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
-            val crop = minOf(source.width, source.height)
-            val left = (source.width - crop) / 2
-            val top = (source.height - crop) / 2
-            shader.setLocalMatrix(android.graphics.Matrix().apply {
-                setScale(side.toFloat() / crop, side.toFloat() / crop)
-                postTranslate(-left * side.toFloat() / crop, -top * side.toFloat() / crop)
-            })
-            paint.shader = shader
-            Canvas(output).drawCircle(side / 2f, side / 2f, side / 2f, paint)
-            return output
+
+            paint.color = Color.rgb(12, 12, 14)
+            canvas.drawCircle(center, center, center - 2f, paint)
+            for (index in 0..30) {
+                val radius = side * (0.34f + index * 0.0047f)
+                paint.color = if (index % 2 == 0) 0xFF27272B.toInt() else 0xFF141417.toInt()
+                paint.style = Paint.Style.STROKE
+                paint.strokeWidth = if (index % 3 == 0) 1.5f else 0.8f
+                canvas.drawCircle(center, center, radius, paint)
+            }
+
+            paint.style = Paint.Style.FILL
+            val labelRadius = side * 0.29f
+            if (artwork != null && !artwork.isRecycled) {
+                val shader = BitmapShader(artwork, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
+                val crop = minOf(artwork.width, artwork.height).coerceAtLeast(1)
+                val scale = labelRadius * 2f / crop
+                shader.setLocalMatrix(Matrix().apply {
+                    setScale(scale, scale)
+                    postTranslate(center - artwork.width * scale / 2f, center - artwork.height * scale / 2f)
+                })
+                paint.shader = shader
+                canvas.drawCircle(center, center, labelRadius, paint)
+                paint.shader = null
+            } else {
+                paint.color = accent
+                canvas.drawCircle(center, center, labelRadius, paint)
+            }
+
+            paint.color = 0xFF111114.toInt()
+            canvas.drawCircle(center, center, 4f, paint)
+            paint.color = 0x66FFFFFF
+            paint.style = Paint.Style.STROKE
+            paint.strokeWidth = 2f
+            canvas.drawCircle(center, center, labelRadius + 3f, paint)
+            paint.style = Paint.Style.FILL
+
+            val rotated = Bitmap.createBitmap(
+                record, 0, 0, side, side,
+                Matrix().apply { postRotate(degrees, center, center) }, true
+            )
+            record.recycle()
+            return rotated
         }
     }
+}
+
+class VinylMiniWidgetProvider : VinylBaseWidgetProvider() {
+    protected override val widgetStyle = WidgetStyle.MINI
+}
+
+class VinylPlayerWidgetProvider : VinylBaseWidgetProvider() {
+    protected override val widgetStyle = WidgetStyle.PLAYER
+}
+
+class VinylTurntableWidgetProvider : VinylBaseWidgetProvider() {
+    protected override val widgetStyle = WidgetStyle.TURNTABLE
 }
 
 class VinylWidgetActionReceiver : android.content.BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         try {
             val manager = context.getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
-            val controller = manager.getActiveSessions(
-                VinylNotificationListenerService.componentName(context)
-            ).firstOrNull { it.playbackState?.state == PlaybackState.STATE_PLAYING }
-                ?: manager.getActiveSessions(VinylNotificationListenerService.componentName(context)).firstOrNull()
+            val sessions = manager.getActiveSessions(VinylNotificationListenerService.componentName(context))
+            val controller = sessions.firstOrNull { it.playbackState?.state == PlaybackState.STATE_PLAYING }
+                ?: sessions.firstOrNull()
             when (intent.action) {
                 PREVIOUS -> controller?.transportControls?.skipToPrevious()
                 NEXT -> controller?.transportControls?.skipToNext()
@@ -142,9 +229,9 @@ class VinylWidgetActionReceiver : android.content.BroadcastReceiver() {
                 }
             }
         } catch (_: Exception) {
-            // Permission may be off or the source app may have closed.
+            // Notification access may be disabled, or the media app may have closed.
         }
-        VinylWidgetProvider.updateAll(context)
+        VinylBaseWidgetProvider.updateAll(context)
     }
 
     companion object {

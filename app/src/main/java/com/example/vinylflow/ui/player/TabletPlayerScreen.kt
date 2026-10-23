@@ -46,9 +46,9 @@ fun TabletPlayerScreen(
             .background(
                 Brush.linearGradient(
                     colors = listOf(
-                        Color(0xFFE98850),
-                        Color(0xFFB8523B),
-                        Color(0xFF351D20)
+                        Color(0xFFECEDEF),
+                        Color(0xFFF8F8F6),
+                        Color(0xFFE3F0E4)
                     ),
                     start = androidx.compose.ui.geometry.Offset(0f, 0f),
                     end   = androidx.compose.ui.geometry.Offset(2000f, 1200f)
@@ -100,6 +100,8 @@ private fun TabletMainLayout(
 ) {
     val track  = state.track
     val accent = Color(theme.accentColor)
+    val ink = Color(0xFF292A30)
+    val muted = Color(0xFF747780)
 
     Row(modifier = Modifier.fillMaxSize()) {
 
@@ -108,12 +110,11 @@ private fun TabletMainLayout(
             modifier = Modifier
                 .weight(0.48f)
                 .fillMaxHeight()
-                .padding(48.dp),
+                .padding(34.dp)
+                .clip(androidx.compose.foundation.shape.RoundedCornerShape(34.dp))
+                .background(Brush.linearGradient(listOf(Color(0xFFF4F4F2), Color(0xFFD0D3D6), Color(0xFFBFC2C6)))),
             contentAlignment = Alignment.Center
         ) {
-            if (theme.showToneArm) {
-                ToneArm(isPlaying = state.isPlaying, armColor = Color(theme.toneArmColor))
-            }
             VinylRecord(
                 isPlaying       = state.isPlaying,
                 artwork         = if (theme.showArtwork) track?.artworkBitmap else null,
@@ -127,6 +128,9 @@ private fun TabletMainLayout(
                     .fillMaxWidth()
                     .aspectRatio(1f)
             )
+            if (theme.showToneArm) {
+                ToneArm(isPlaying = state.isPlaying, armColor = Color(theme.toneArmColor))
+            }
         }
 
         // Divider
@@ -135,7 +139,7 @@ private fun TabletMainLayout(
                 .width(1.dp)
                 .fillMaxHeight()
                 .padding(vertical = 40.dp)
-                .background(Color.White.copy(alpha = 0.1f))
+                .background(ink.copy(alpha = 0.06f))
         )
 
         // ── Right Panel: Info + Controls ──────────────────────────────────────
@@ -156,7 +160,7 @@ private fun TabletMainLayout(
                 Row(
                     modifier = Modifier
                         .clip(MaterialTheme.shapes.extraLarge)
-                        .background(Color.White.copy(alpha = 0.08f))
+                        .background(ink.copy(alpha = 0.06f))
                         .clickable(onClick = onOpenSources)
                         .padding(horizontal = 14.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -170,18 +174,18 @@ private fun TabletMainLayout(
                     Text(
                         state.source?.appName ?: "No Source",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White.copy(alpha = 0.85f)
+                        color = ink
                     )
-                    Icon(Icons.Rounded.UnfoldMore, null, tint = Color.White.copy(alpha = 0.4f), modifier = Modifier.size(16.dp))
+                    Icon(Icons.Rounded.UnfoldMore, null, tint = muted, modifier = Modifier.size(16.dp))
                 }
 
                 // Action buttons
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     IconButton(onClick = onOpenCustomize) {
-                        Icon(Icons.Rounded.Palette, "Customize", tint = Color.White.copy(alpha = 0.55f))
+                        Icon(Icons.Rounded.Palette, "Customize", tint = muted)
                     }
                     IconButton(onClick = onOpenSettings) {
-                        Icon(Icons.Rounded.Settings, "Settings", tint = Color.White.copy(alpha = 0.55f))
+                        Icon(Icons.Rounded.Settings, "Settings", tint = muted)
                     }
                 }
             }
@@ -202,7 +206,7 @@ private fun TabletMainLayout(
                         track.displayTitle,
                         style      = MaterialTheme.typography.displaySmall,
                         fontWeight = FontWeight.Bold,
-                        color      = Color.White,
+                        color      = ink,
                         maxLines   = 2,
                         overflow   = TextOverflow.Ellipsis,
                         lineHeight = 40.sp
@@ -210,7 +214,7 @@ private fun TabletMainLayout(
                     Text(
                         track.displayArtist,
                         style  = MaterialTheme.typography.titleMedium,
-                        color  = Color.White.copy(alpha = 0.65f),
+                        color  = muted,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -221,12 +225,12 @@ private fun TabletMainLayout(
                         "Nothing Playing",
                         style      = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
-                        color      = Color.White.copy(alpha = 0.5f)
+                        color      = ink.copy(alpha = 0.65f)
                     )
                     Text(
                         "Start a media app to begin",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = Color.White.copy(alpha = 0.3f)
+                        color = muted.copy(alpha = 0.7f)
                     )
                 }
             }
@@ -242,12 +246,12 @@ private fun TabletMainLayout(
                             colors = SliderDefaults.colors(
                                 thumbColor         = accent,
                                 activeTrackColor   = accent,
-                                inactiveTrackColor = Color.White.copy(alpha = 0.2f)
+                                inactiveTrackColor = ink.copy(alpha = 0.16f)
                             )
                         )
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(formatMs(positionMs), color = Color.White.copy(alpha = 0.45f), style = MaterialTheme.typography.labelSmall)
-                            Text(formatMs(track.durationMs), color = Color.White.copy(alpha = 0.45f), style = MaterialTheme.typography.labelSmall)
+                            Text(formatMs(positionMs), color = muted, style = MaterialTheme.typography.labelSmall)
+                            Text(formatMs(track.durationMs), color = muted, style = MaterialTheme.typography.labelSmall)
                         }
                     }
                 }
@@ -266,7 +270,7 @@ private fun TabletMainLayout(
                         ) {
                             Icon(
                                 Icons.Rounded.SkipPrevious, "Previous",
-                                tint     = if (MediaAction.PREVIOUS in state.supportedActions) Color.White else Color.White.copy(alpha = 0.25f),
+                                tint     = if (MediaAction.PREVIOUS in state.supportedActions) ink else ink.copy(alpha = 0.25f),
                                 modifier = Modifier.size(40.dp)
                             )
                         }
@@ -294,7 +298,7 @@ private fun TabletMainLayout(
                         ) {
                             Icon(
                                 Icons.Rounded.SkipNext, "Next",
-                                tint     = if (MediaAction.NEXT in state.supportedActions) Color.White else Color.White.copy(alpha = 0.25f),
+                                tint     = if (MediaAction.NEXT in state.supportedActions) ink else ink.copy(alpha = 0.25f),
                                 modifier = Modifier.size(40.dp)
                             )
                         }
@@ -303,8 +307,8 @@ private fun TabletMainLayout(
 
                 // Active sessions sidebar
                 if (sessions.isNotEmpty()) {
-                    Divider(color = Color.White.copy(alpha = 0.08f))
-                    Text("Active Sessions", style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.4f))
+                    Divider(color = ink.copy(alpha = 0.1f))
+                    Text("Active Sessions", style = MaterialTheme.typography.labelMedium, color = muted)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         sessions.take(4).forEach { src ->
                             val isActive = src.packageName == state.source?.packageName
@@ -313,7 +317,7 @@ private fun TabletMainLayout(
                                     .clip(MaterialTheme.shapes.large)
                                     .background(
                                         if (isActive) accent.copy(alpha = 0.2f)
-                                        else Color.White.copy(alpha = 0.06f)
+                                        else ink.copy(alpha = 0.06f)
                                     )
                                     .clickable { onSelectSource(src.packageName) }
                                     .padding(horizontal = 12.dp, vertical = 8.dp),
@@ -326,7 +330,7 @@ private fun TabletMainLayout(
                                 Text(
                                     src.appName,
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = if (isActive) accent else Color.White.copy(alpha = 0.65f)
+                                    color = if (isActive) accent else muted
                                 )
                             }
                         }

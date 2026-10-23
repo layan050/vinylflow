@@ -98,15 +98,16 @@ private fun VinylPlayerConsole(
     onOpenSettings: () -> Unit
 ) {
     val track = state.track
-    val accent = Color(0xFFFFD7AA)
-    val titleColor = Color(0xFFFFF3E5)
+    val accent = Color(theme.accentColor)
+    val ink = Color(0xFF24252B)
+    val muted = Color(0xFF777981)
 
     Box(
         Modifier
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    listOf(Color(0xFFE98850), Color(0xFFB8523B), Color(0xFF351D20))
+                    listOf(Color(0xFFECEDEF), Color(0xFFF8F8F6), Color(0xFFE3F0E4))
                 )
             )
     ) {
@@ -114,7 +115,7 @@ private fun VinylPlayerConsole(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 22.dp, vertical = 18.dp),
+                .padding(horizontal = 22.dp, vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
@@ -125,60 +126,72 @@ private fun VinylPlayerConsole(
                 Column {
                     Text(
                         "VINYLFLOW",
-                        color = titleColor,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 3.sp
+                        color = ink,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 2.2.sp
                     )
                     Text(
-                        "THE LITTLE TURNTABLE",
-                        color = titleColor.copy(alpha = 0.68f),
+                        "YOUR MUSIC, ON VINYL",
+                        color = muted,
                         style = MaterialTheme.typography.labelSmall,
-                        letterSpacing = 1.8.sp
+                        letterSpacing = 1.1.sp
                     )
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    SourceChip(state.source, accent, onOpenSources)
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(30.dp))
+                            .background(Color.White.copy(alpha = 0.78f))
+                            .clickable(onClick = onOpenSources)
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(7.dp)
+                    ) {
+                        Box(Modifier.size(8.dp).background(if (state.source != null) accent else muted.copy(alpha = 0.45f), CircleShape))
+                        Text(state.source?.appName ?: "Choose music", color = ink, style = MaterialTheme.typography.labelMedium)
+                    }
                     IconButton(onClick = onOpenCustomize) {
-                        Icon(Icons.Rounded.Tune, "Customize player", tint = titleColor)
+                        Icon(Icons.Rounded.Tune, "Customize player", tint = muted)
                     }
                 }
             }
 
-            Spacer(Modifier.height(18.dp))
+            Spacer(Modifier.height(10.dp))
 
-            // Warm, compact turntable deck inspired by the tactile MD Vinyl player.
+            // Silver, top-down turntable based on the supplied reference images.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(320.dp)
-                    .clip(RoundedCornerShape(34.dp))
+                    .widthIn(max = 430.dp)
+                    .aspectRatio(1f)
+                    .shadow(20.dp, RoundedCornerShape(30.dp))
+                    .clip(RoundedCornerShape(30.dp))
                     .background(
                         Brush.linearGradient(
-                            listOf(Color(0xFFFFB873), Color(0xFFE37D49), Color(0xFFC65C3C))
+                            listOf(Color(0xFFF5F5F4), Color(0xFFD7D9DC), Color(0xFFBFC2C6))
                         )
-                    ),
+                    )
+                    .border(1.dp, Color.White.copy(alpha = 0.88f), RoundedCornerShape(30.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    "33⅓ RPM  ·  STEREO",
+                    "33⅓ RPM",
                     modifier = Modifier.align(Alignment.TopStart).padding(20.dp),
-                    color = Color(0xFF5E3028).copy(alpha = 0.72f),
+                    color = Color(0xFF555860).copy(alpha = 0.75f),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.5.sp
+                    letterSpacing = 1.3.sp
                 )
                 Box(
                     modifier = Modifier
-                        .size(252.dp)
-                        .shadow(18.dp, CircleShape)
-                        .background(Color(0xFF9C4C36), CircleShape)
-                        .padding(8.dp),
+                        .fillMaxWidth(0.84f)
+                        .aspectRatio(1f)
+                        .shadow(15.dp, CircleShape)
+                        .background(Color(0xFFB2B5B9), CircleShape)
+                        .padding(5.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (theme.showToneArm) {
-                        ToneArm(isPlaying = state.isPlaying, armColor = Color(0xFFECE0CB))
-                    }
                     VinylRecord(
                         isPlaying = state.isPlaying,
                         artwork = if (theme.showArtwork) track?.artworkBitmap else null,
@@ -190,58 +203,54 @@ private fun VinylPlayerConsole(
                         grooveIntensity = theme.grooveIntensity,
                         modifier = Modifier.fillMaxSize()
                     )
+                    if (theme.showToneArm) {
+                        ToneArm(isPlaying = state.isPlaying, armColor = Color(theme.toneArmColor))
+                    }
                 }
                 Text(
-                    "MADE FOR THE MOMENT",
+                    "STEREO  ·  HI-FI",
                     modifier = Modifier.align(Alignment.BottomEnd).padding(18.dp),
-                    color = Color(0xFF5E3028).copy(alpha = 0.68f),
+                    color = Color(0xFF555860).copy(alpha = 0.7f),
                     style = MaterialTheme.typography.labelSmall,
-                    letterSpacing = 1.1.sp
+                    letterSpacing = 1.2.sp
                 )
             }
 
-            Spacer(Modifier.height(22.dp))
+            Spacer(Modifier.height(15.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.Center
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         track?.displayTitle ?: "Nothing playing",
-                        color = titleColor,
+                        color = ink,
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
                     )
-                    Spacer(Modifier.height(3.dp))
+                    Spacer(Modifier.height(2.dp))
                     Text(
-                        track?.displayArtist ?: "Open a music app to drop the needle",
-                        color = titleColor.copy(alpha = 0.75f),
-                        style = MaterialTheme.typography.bodyLarge,
+                        track?.displayArtist ?: "Start a song and let the record spin",
+                        color = muted,
+                        style = MaterialTheme.typography.bodyMedium,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                if (track?.displayAlbum?.isNotBlank() == true) {
-                    Text(
-                        track.displayAlbum.uppercase(),
-                        color = accent.copy(alpha = 0.9f),
-                        style = MaterialTheme.typography.labelSmall,
-                        maxLines = 1,
-                        modifier = Modifier.widthIn(max = 92.dp)
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
                     )
                 }
             }
 
             if (track != null && MediaAction.SEEK in state.supportedActions && track.durationMs > 0L) {
-                Spacer(Modifier.height(10.dp))
-                SeekBar(positionMs, track.durationMs, accent, onSeek)
+                Spacer(Modifier.height(7.dp))
+                SeekBar(positionMs, track.durationMs, accent, onSeek, textColor = muted)
             }
 
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(3.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
@@ -250,21 +259,21 @@ private fun VinylPlayerConsole(
                 IconButton(
                     onClick = onPrev,
                     enabled = MediaAction.PREVIOUS in state.supportedActions,
-                    modifier = Modifier.size(58.dp)
+                    modifier = Modifier.size(60.dp)
                 ) {
                     Icon(
                         Icons.Rounded.SkipPrevious,
                         "Previous track",
-                        tint = titleColor.copy(alpha = if (MediaAction.PREVIOUS in state.supportedActions) 1f else 0.35f),
+                        tint = ink.copy(alpha = if (MediaAction.PREVIOUS in state.supportedActions) 1f else 0.35f),
                         modifier = Modifier.size(34.dp)
                     )
                 }
                 Box(
                     modifier = Modifier
                         .padding(horizontal = 22.dp)
-                        .size(68.dp)
-                        .shadow(10.dp, CircleShape)
-                        .background(Color(0xFFFFF2E2), CircleShape)
+                        .size(76.dp)
+                        .shadow(8.dp, CircleShape)
+                        .background(accent, CircleShape)
                         .clickable(enabled = state.isActive) {
                             if (state.isPlaying) onPause() else onPlay()
                         },
@@ -273,45 +282,40 @@ private fun VinylPlayerConsole(
                     Icon(
                         if (state.isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
                         if (state.isPlaying) "Pause" else "Play",
-                        tint = Color(0xFF71372D),
+                        tint = Color.White,
                         modifier = Modifier.size(38.dp)
                     )
                 }
                 IconButton(
                     onClick = onNext,
                     enabled = MediaAction.NEXT in state.supportedActions,
-                    modifier = Modifier.size(58.dp)
+                    modifier = Modifier.size(60.dp)
                 ) {
                     Icon(
                         Icons.Rounded.SkipNext,
                         "Next track",
-                        tint = titleColor.copy(alpha = if (MediaAction.NEXT in state.supportedActions) 1f else 0.35f),
+                        tint = ink.copy(alpha = if (MediaAction.NEXT in state.supportedActions) 1f else 0.35f),
                         modifier = Modifier.size(34.dp)
                     )
                 }
             }
 
-            Spacer(Modifier.height(10.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp))
-                    .background(Color.Black.copy(alpha = 0.15f)).padding(vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                PlayerNavAction(Icons.Rounded.LibraryMusic, "Sources", onOpenSources)
-                PlayerNavAction(Icons.Rounded.Palette, "Looks", onOpenCustomize)
-                PlayerNavAction(Icons.Rounded.Settings, "Settings", onOpenSettings)
+            Spacer(Modifier.height(5.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                PlayerNavAction(Icons.Rounded.LibraryMusic, "Sources", onOpenSources, ink)
+                PlayerNavAction(Icons.Rounded.Palette, "Looks", onOpenCustomize, ink)
+                PlayerNavAction(Icons.Rounded.Settings, "Settings", onOpenSettings, ink)
             }
         }
     }
 }
 
 @Composable
-private fun PlayerNavAction(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, onClick: () -> Unit) {
+private fun PlayerNavAction(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, onClick: () -> Unit, tint: Color = Color.White) {
     TextButton(onClick = onClick) {
-        Icon(icon, contentDescription = null, tint = Color(0xFFFFE8CF), modifier = Modifier.size(18.dp))
+        Icon(icon, contentDescription = null, tint = tint.copy(alpha = 0.72f), modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(7.dp))
-        Text(label, color = Color(0xFFFFE8CF), style = MaterialTheme.typography.labelLarge)
+        Text(label, color = tint.copy(alpha = 0.72f), style = MaterialTheme.typography.labelLarge)
     }
 }
 
@@ -438,6 +442,16 @@ fun VinylRecord(
 ) {
     // Stop the motor where it is when paused; do not animate a hidden/idle record.
     val rotation = remember { Animatable(0f) }
+    val artworkShader = remember(artwork) {
+        artwork?.let {
+            android.graphics.BitmapShader(
+                it,
+                android.graphics.Shader.TileMode.CLAMP,
+                android.graphics.Shader.TileMode.CLAMP
+            )
+        }
+    }
+    val artworkBrush = remember(artworkShader) { artworkShader?.let(::ShaderBrush) }
     LaunchedEffect(isPlaying) {
         while (isActive && isPlaying) {
             val remainder = 360f - (rotation.value % 360f)
@@ -493,24 +507,14 @@ fun VinylRecord(
         drawCircle(color = labelColor, radius = labelR, center = cx)
 
         // Artwork inside label
-        if (artwork != null) {
+        if (artwork != null && artworkShader != null && artworkBrush != null) {
+            val scale = labelR * 2f / minOf(artwork.width, artwork.height).coerceAtLeast(1)
+            artworkShader.setLocalMatrix(android.graphics.Matrix().apply {
+                setScale(scale, scale)
+                postTranslate(cx.x - artwork.width * scale / 2f, cx.y - artwork.height * scale / 2f)
+            })
             drawCircle(
-                brush  = ShaderBrush(
-                    android.graphics.BitmapShader(
-                        Bitmap.createScaledBitmap(
-                            artwork,
-                            (labelR * 2).toInt().coerceAtLeast(1),
-                            (labelR * 2).toInt().coerceAtLeast(1),
-                            true
-                        ),
-                        android.graphics.Shader.TileMode.CLAMP,
-                        android.graphics.Shader.TileMode.CLAMP
-                    ).apply {
-                        setLocalMatrix(android.graphics.Matrix().apply {
-                            setTranslate(cx.x - labelR, cx.y - labelR)
-                        })
-                    }
-                ),
+                brush  = artworkBrush,
                 radius = labelR,
                 center = cx
             )
@@ -537,7 +541,11 @@ fun VinylRecord(
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
-fun ToneArm(isPlaying: Boolean, armColor: Color) {
+fun ToneArm(
+    isPlaying: Boolean,
+    armColor: Color,
+    modifier: Modifier = Modifier.fillMaxSize()
+) {
     val angle by animateFloatAsState(
         targetValue   = if (isPlaying) 28f else 12f,
         animationSpec = tween(durationMillis = 800, easing = EaseInOutCubic),
@@ -545,17 +553,15 @@ fun ToneArm(isPlaying: Boolean, armColor: Color) {
     )
 
     Canvas(
-        modifier = Modifier
-            .size(200.dp)
-            .offset(x = 55.dp, y = (-55).dp),
+        modifier = modifier,
     ) {
-        val pivotX = size.width * 0.88f
-        val pivotY = size.height * 0.05f
-        val pivotR = 14f
+        val pivotX = size.width * 0.84f
+        val pivotY = size.height * 0.10f
+        val pivotR = 12.dp.toPx()
 
         val rad  = Math.toRadians(angle.toDouble())
-        val armL = size.height * 0.85f
-        val tipX = pivotX + armL * sin(rad).toFloat()
+        val armL = size.minDimension * 0.67f
+        val tipX = pivotX - armL * sin(rad).toFloat()
         val tipY = pivotY + armL * cos(rad).toFloat()
 
         // Arm shadow
@@ -563,7 +569,7 @@ fun ToneArm(isPlaying: Boolean, armColor: Color) {
             color       = Color.Black.copy(alpha = 0.4f),
             start       = Offset(pivotX + 2f, pivotY + 2f),
             end         = Offset(tipX + 2f, tipY + 2f),
-            strokeWidth = 5f,
+            strokeWidth = 6.dp.toPx(),
             cap         = StrokeCap.Round
         )
         // Arm
@@ -571,7 +577,7 @@ fun ToneArm(isPlaying: Boolean, armColor: Color) {
             color       = armColor,
             start       = Offset(pivotX, pivotY),
             end         = Offset(tipX, tipY),
-            strokeWidth = 4f,
+            strokeWidth = 4.dp.toPx(),
             cap         = StrokeCap.Round
         )
         // Pivot circle
@@ -582,7 +588,13 @@ fun ToneArm(isPlaying: Boolean, armColor: Color) {
             center = Offset(pivotX, pivotY)
         )
         // Needle
-        drawCircle(color = armColor.copy(alpha = 0.9f), radius = 5f, center = Offset(tipX, tipY))
+        drawRoundRect(
+            color = armColor,
+            topLeft = Offset(tipX - 8.dp.toPx(), tipY - 5.dp.toPx()),
+            size = androidx.compose.ui.geometry.Size(18.dp.toPx(), 10.dp.toPx()),
+            cornerRadius = androidx.compose.ui.geometry.CornerRadius(3.dp.toPx())
+        )
+        drawCircle(color = Color(0xFF36383D), radius = 2.dp.toPx(), center = Offset(tipX - 2.dp.toPx(), tipY))
     }
 }
 
@@ -631,7 +643,8 @@ private fun SeekBar(
     positionMs: Long,
     durationMs: Long,
     accentColor: Color,
-    onSeek: (Long) -> Unit
+    onSeek: (Long) -> Unit,
+    textColor: Color = Color.White
 ) {
     val fraction = if (durationMs > 0) (positionMs.toFloat() / durationMs).coerceIn(0f, 1f) else 0f
 
@@ -642,15 +655,15 @@ private fun SeekBar(
             colors        = SliderDefaults.colors(
                 thumbColor          = accentColor,
                 activeTrackColor    = accentColor,
-                inactiveTrackColor  = Color.White.copy(alpha = 0.2f)
+                inactiveTrackColor  = textColor.copy(alpha = 0.2f)
             )
         )
         Row(
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(formatTime(positionMs), color = Color.White.copy(alpha = 0.55f), style = MaterialTheme.typography.labelSmall)
-            Text(formatTime(durationMs), color = Color.White.copy(alpha = 0.55f), style = MaterialTheme.typography.labelSmall)
+            Text(formatTime(positionMs), color = textColor.copy(alpha = 0.55f), style = MaterialTheme.typography.labelSmall)
+            Text(formatTime(durationMs), color = textColor.copy(alpha = 0.55f), style = MaterialTheme.typography.labelSmall)
         }
     }
 }

@@ -10,7 +10,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import com.example.vinylflow.domain.model.*
-import com.example.vinylflow.widget.VinylWidgetProvider
+import com.example.vinylflow.widget.VinylBaseWidgetProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -47,6 +47,17 @@ class MediaSessionRepository(private val context: Context) {
     private var sessionManager: MediaSessionManager? = null
     private var activeController: MediaController? = null
     private val mainHandler = Handler(Looper.getMainLooper())
+    private var widgetAnimationRunning = false
+    private val widgetSpinTicker = object : Runnable {
+        override fun run() {
+            if (!_mediaState.value.isPlaying || !VinylBaseWidgetProvider.hasWidgets(context)) {
+                widgetAnimationRunning = false
+                return
+            }
+            VinylBaseWidgetProvider.updateAll(context)
+            mainHandler.postDelayed(this, 500L)
+        }
+    }
 
     private val sessionListener = MediaSessionManager.OnActiveSessionsChangedListener { controllers ->
         onSessionsChanged(controllers ?: emptyList())
@@ -209,11 +220,22 @@ class MediaSessionRepository(private val context: Context) {
     } catch (e: Exception) { pkg }
 
     private fun refreshWidgets() {
-        try { VinylWidgetProvider.updateAll(context) }
-        catch (e: Exception) { Log.w(TAG, "Widget refresh failed: ${e.message}") }
+        try {
+            val hasWidgets = VinylBaseWidgetProvider.hasWidgets(context)
+            if (hasWidgets) VinylBaseWidgetProvider.updateAll(context)
+            if (_mediaState.value.isPlaying && hasWidgets && !widgetAnimationRunning) {
+                widgetAnimationRunning = true
+                mainHandler.postDelayed(widgetSpinTicker, 500L)
+            } else if ((!_mediaState.value.isPlaying || !hasWidgets) && widgetAnimationRunning) {
+                mainHandler.removeCallbacks(widgetSpinTicker)
+                widgetAnimationRunning = false
+            }
+        } catch (e: Exception) { Log.w(TAG, "Widget refresh failed: ${e.message}") }
     }
 
     fun cleanup() {
+        mainHandler.removeCallbacks(widgetSpinTicker)
+        widgetAnimationRunning = false
         try { sessionManager?.removeOnActiveSessionsChangedListener(sessionListener) }
         catch (e: Exception) { /* ignore */ }
         activeController?.unregisterCallback(controllerCallback)

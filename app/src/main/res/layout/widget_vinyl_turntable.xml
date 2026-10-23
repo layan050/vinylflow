@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_panel_silver"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <TextView
+        android:id="@+id/widget_source"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:letterSpacing="0.14"
+        android:text="STUDIO TURNTABLE · SILVER"
+        android:textColor="#FF656873"
+        android:textSize="9sp" />
+
+    <TextView
+        android:id="@+id/widget_track_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif-medium"
+        android:maxLines="1"
+        android:text="Nothing playing"
+        android:textColor="#FF27282C"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/widget_track_artist"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="Start music to spin"
+        android:textColor="#FF777982"
+        android:textSize="11sp" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="4dp"
+        android:layout_weight="1"
+        android:background="@drawable/widget_platter_silver">
+
+        <ImageView
+            android:id="@+id/widget_record"
+            android:layout_width="188dp"
+            android:layout_height="188dp"
+            android:layout_gravity="center"
+            android:contentDescription="Spinning vinyl with album art" />
+
+        <ImageView
+            android:layout_width="208dp"
+            android:layout_height="208dp"
+            android:layout_gravity="center"
+            android:contentDescription="Turntable tonearm"
+            android:src="@drawable/widget_tonearm" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="44dp"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/widget_previous"
+            android:layout_width="46dp"
+            android:layout_height="44dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="Previous track"
+            android:padding="11dp"
+            android:src="@android:drawable/ic_media_previous" />
+
+        <ImageButton
+            android:id="@+id/widget_play_pause"
+            android:layout_width="50dp"
+            android:layout_height="44dp"
+            android:background="@drawable/widget_play_button_violet"
+            android:contentDescription="Play or pause"
+            android:padding="12dp"
+            android:src="@android:drawable/ic_media_play" />
+
+        <ImageButton
+            android:id="@+id/widget_next"
+            android:layout_width="46dp"
+            android:layout_height="44dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="Next track"
+            android:padding="11dp"
+            android:src="@android:drawable/ic_media_next" />
+    </LinearLayout>
+</LinearLayout>

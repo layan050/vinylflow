@@ -65,7 +65,7 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
                         icon = Icons.Rounded.Widgets,
                         iconTint = Color(0xFFD97847),
                         title = "Add VinylFlow player",
-                        subtitle = "Long-press the home screen → Widgets → VinylFlow → drag the player onto your screen",
+                        subtitle = "Hold the home screen → Widgets → VinylFlow. Pick Mini Violet, Player Cream, or Silver Turntable; resize it after placing.",
                         onClick = {}
                     )
                 }
@@ -149,7 +149,7 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
                         icon     = Icons.Rounded.Album,
                         iconTint = Color(0xFFD97847),
                         title    = "VinylFlow",
-                        subtitle = "Version 1.1.0 • Android Vinyl Player",
+                        subtitle = "Version 1.2.0 • Android Vinyl Player",
                         onClick  = {}
                     )
                 }
