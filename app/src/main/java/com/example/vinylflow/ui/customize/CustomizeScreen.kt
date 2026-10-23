@@ -34,7 +34,7 @@ fun CustomizeScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Brush.verticalGradient(listOf(Color(0xFF060610), Color(0xFF0D0D1A))))
+            .background(Brush.verticalGradient(listOf(Color(0xFF351D20), Color(0xFF241416))))
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Top bar
@@ -194,7 +194,7 @@ private fun PresetCard(preset: ThemePreset, isSelected: Boolean, onClick: () -> 
             .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onClick)
             .then(
-                if (isSelected) Modifier.border(2.dp, Color(0xFF7C6AF7), MaterialTheme.shapes.medium)
+                if (isSelected) Modifier.border(2.dp, Color(0xFFD97847), MaterialTheme.shapes.medium)
                 else Modifier
             )
             .background(Color.White.copy(alpha = 0.06f))
@@ -206,7 +206,7 @@ private fun PresetCard(preset: ThemePreset, isSelected: Boolean, onClick: () -> 
                 .size(40.dp)
                 .background(Color(t.recordColor), CircleShape)
                 .then(
-                    if (isSelected) Modifier.border(2.dp, Color(0xFF7C6AF7), CircleShape)
+                    if (isSelected) Modifier.border(2.dp, Color(0xFFD97847), CircleShape)
                     else Modifier
                 )
         ) {
@@ -221,7 +221,7 @@ private fun PresetCard(preset: ThemePreset, isSelected: Boolean, onClick: () -> 
         Text(
             text  = preset.name.replace("_", "\n"),
             style = MaterialTheme.typography.labelSmall,
-            color = if (isSelected) Color(0xFF7C6AF7) else Color.White.copy(alpha = 0.65f),
+            color = if (isSelected) Color(0xFFD97847) else Color.White.copy(alpha = 0.65f),
             maxLines = 2,
             lineHeight = MaterialTheme.typography.labelSmall.fontSize * 1.3
         )
@@ -247,7 +247,7 @@ private fun ColorPicker(
                     .clickable { onSelect(colorLong) }
                     .then(
                         if (colorLong == selected)
-                            Modifier.border(3.dp, Color(0xFF7C6AF7), CircleShape)
+                            Modifier.border(3.dp, Color(0xFFD97847), CircleShape)
                         else
                             Modifier.border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
                     )
@@ -269,7 +269,7 @@ private fun ToggleRow(label: String, checked: Boolean, onToggle: (Boolean) -> Un
         Switch(
             checked         = checked,
             onCheckedChange = onToggle,
-            colors          = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFF7C6AF7))
+            colors          = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFFD97847))
         )
     }
 }

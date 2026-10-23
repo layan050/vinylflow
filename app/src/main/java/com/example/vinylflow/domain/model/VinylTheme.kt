@@ -19,8 +19,8 @@ data class VinylTheme(
     val showGrooves: Boolean = true,
     val showToneArm: Boolean = true,
     val toneArmColor: Long = 0xFFB0B8C8L,
-    val backgroundColor: Long = 0xFF060610L,
-    val accentColor: Long = 0xFF7C6AF7L,
+    val backgroundColor: Long = 0xFF351D20L,
+    val accentColor: Long = 0xFFD97847L,
     val showArtwork: Boolean = true,
     val showTrackInfo: Boolean = true,
     val showControls: Boolean = true,
@@ -36,8 +36,8 @@ val PRESET_MIDNIGHT_BLACK = VinylTheme(
     grooveColor = 0xFF1A1A22L,
     labelColor = 0xFF1C1C2EL,
     toneArmColor = 0xFFB0B8C8L,
-    backgroundColor = 0xFF060610L,
-    accentColor = 0xFF7C6AF7L,
+    backgroundColor = 0xFF351D20L,
+    accentColor = 0xFFD97847L,
     grooveIntensity = 0.55f
 )
 

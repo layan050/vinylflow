@@ -29,7 +29,7 @@ import com.example.vinylflow.domain.model.*
  */
 @Composable
 fun TabletPlayerScreen(
-    theme: VinylTheme = PRESET_MIDNIGHT_BLACK,
+    theme: VinylTheme = PRESET_VINTAGE_CREAM,
     onOpenSources: () -> Unit = {},
     onOpenCustomize: () -> Unit = {},
     onOpenSettings: () -> Unit = {}
@@ -46,9 +46,9 @@ fun TabletPlayerScreen(
             .background(
                 Brush.linearGradient(
                     colors = listOf(
-                        Color(theme.backgroundColor),
-                        Color(theme.recordColor).copy(alpha = 0.3f),
-                        Color(theme.backgroundColor)
+                        Color(0xFFE98850),
+                        Color(0xFFB8523B),
+                        Color(0xFF351D20)
                     ),
                     start = androidx.compose.ui.geometry.Offset(0f, 0f),
                     end   = androidx.compose.ui.geometry.Offset(2000f, 1200f)
@@ -358,10 +358,10 @@ private fun TabletPermissionScreen(onOpenSettings: () -> Unit) {
             VinylRecord(
                 isPlaying       = false,
                 artwork         = null,
-                recordColor     = Color(0xFF1A1A2E),
-                grooveColor     = Color(0xFF25253A),
-                labelColor      = Color(0xFF2D2D45),
-                accentColor     = Color(0xFF7C6AF7),
+                recordColor     = Color(0xFF171313),
+                grooveColor     = Color(0xFF29201D),
+                labelColor      = Color(0xFF563324),
+                accentColor     = Color(0xFFD97847),
                 showGrooves     = true,
                 grooveIntensity = 0.4f,
                 modifier        = Modifier.size(300.dp).alpha(0.5f)
@@ -378,7 +378,7 @@ private fun TabletPermissionScreen(onOpenSettings: () -> Unit) {
         ) {
             Icon(
                 Icons.Rounded.MusicNote, null,
-                tint     = Color(0xFF7C6AF7),
+                tint     = Color(0xFFD97847),
                 modifier = Modifier.size(56.dp)
             )
             Spacer(Modifier.height(20.dp))
@@ -401,7 +401,7 @@ private fun TabletPermissionScreen(onOpenSettings: () -> Unit) {
             Spacer(Modifier.height(32.dp))
             Button(
                 onClick = onOpenSettings,
-                colors  = ButtonDefaults.buttonColors(containerColor = Color(0xFF7C6AF7)),
+                colors  = ButtonDefaults.buttonColors(containerColor = Color(0xFFD97847)),
                 modifier = Modifier.height(52.dp)
             ) {
                 Text("Open Notification Settings", style = MaterialTheme.typography.bodyLarge)

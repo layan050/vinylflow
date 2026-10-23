@@ -7,6 +7,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
@@ -29,6 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.vinylflow.domain.model.*
 import kotlin.math.*
+import kotlinx.coroutines.isActive
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Player Screen
@@ -36,7 +38,7 @@ import kotlin.math.*
 
 @Composable
 fun PlayerScreen(
-    theme: VinylTheme = PRESET_MIDNIGHT_BLACK,
+    theme: VinylTheme = PRESET_VINTAGE_CREAM,
     onOpenSources: () -> Unit = {},
     onOpenCustomize: () -> Unit = {},
     onOpenSettings: () -> Unit = {}
@@ -64,13 +66,7 @@ fun PlayerScreen(
                 context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
             })
 
-            !state.isActive || state.track == null -> EmptyPlayerContent(
-                theme = theme,
-                onOpenSources  = onOpenSources,
-                onOpenSettings = onOpenSettings
-            )
-
-            else -> ActivePlayerContent(
+            else -> VinylPlayerConsole(
                 state      = state,
                 positionMs = positionMs,
                 theme      = theme,
@@ -84,6 +80,238 @@ fun PlayerScreen(
                 onOpenSettings  = onOpenSettings
             )
         }
+    }
+}
+
+@Composable
+private fun VinylPlayerConsole(
+    state: MediaState,
+    positionMs: Long,
+    theme: VinylTheme,
+    onPlay: () -> Unit,
+    onPause: () -> Unit,
+    onNext: () -> Unit,
+    onPrev: () -> Unit,
+    onSeek: (Long) -> Unit,
+    onOpenSources: () -> Unit,
+    onOpenCustomize: () -> Unit,
+    onOpenSettings: () -> Unit
+) {
+    val track = state.track
+    val accent = Color(0xFFFFD7AA)
+    val titleColor = Color(0xFFFFF3E5)
+
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    listOf(Color(0xFFE98850), Color(0xFFB8523B), Color(0xFF351D20))
+                )
+            )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 22.dp, vertical = 18.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    Text(
+                        "VINYLFLOW",
+                        color = titleColor,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 3.sp
+                    )
+                    Text(
+                        "THE LITTLE TURNTABLE",
+                        color = titleColor.copy(alpha = 0.68f),
+                        style = MaterialTheme.typography.labelSmall,
+                        letterSpacing = 1.8.sp
+                    )
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    SourceChip(state.source, accent, onOpenSources)
+                    IconButton(onClick = onOpenCustomize) {
+                        Icon(Icons.Rounded.Tune, "Customize player", tint = titleColor)
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(18.dp))
+
+            // Warm, compact turntable deck inspired by the tactile MD Vinyl player.
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(320.dp)
+                    .clip(RoundedCornerShape(34.dp))
+                    .background(
+                        Brush.linearGradient(
+                            listOf(Color(0xFFFFB873), Color(0xFFE37D49), Color(0xFFC65C3C))
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    "33⅓ RPM  ·  STEREO",
+                    modifier = Modifier.align(Alignment.TopStart).padding(20.dp),
+                    color = Color(0xFF5E3028).copy(alpha = 0.72f),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.5.sp
+                )
+                Box(
+                    modifier = Modifier
+                        .size(252.dp)
+                        .shadow(18.dp, CircleShape)
+                        .background(Color(0xFF9C4C36), CircleShape)
+                        .padding(8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (theme.showToneArm) {
+                        ToneArm(isPlaying = state.isPlaying, armColor = Color(0xFFECE0CB))
+                    }
+                    VinylRecord(
+                        isPlaying = state.isPlaying,
+                        artwork = if (theme.showArtwork) track?.artworkBitmap else null,
+                        recordColor = Color(theme.recordColor),
+                        grooveColor = Color(theme.grooveColor),
+                        labelColor = Color(theme.labelColor),
+                        accentColor = accent,
+                        showGrooves = theme.showGrooves,
+                        grooveIntensity = theme.grooveIntensity,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+                Text(
+                    "MADE FOR THE MOMENT",
+                    modifier = Modifier.align(Alignment.BottomEnd).padding(18.dp),
+                    color = Color(0xFF5E3028).copy(alpha = 0.68f),
+                    style = MaterialTheme.typography.labelSmall,
+                    letterSpacing = 1.1.sp
+                )
+            }
+
+            Spacer(Modifier.height(22.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        track?.displayTitle ?: "Nothing playing",
+                        color = titleColor,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(Modifier.height(3.dp))
+                    Text(
+                        track?.displayArtist ?: "Open a music app to drop the needle",
+                        color = titleColor.copy(alpha = 0.75f),
+                        style = MaterialTheme.typography.bodyLarge,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                if (track?.displayAlbum?.isNotBlank() == true) {
+                    Text(
+                        track.displayAlbum.uppercase(),
+                        color = accent.copy(alpha = 0.9f),
+                        style = MaterialTheme.typography.labelSmall,
+                        maxLines = 1,
+                        modifier = Modifier.widthIn(max = 92.dp)
+                    )
+                }
+            }
+
+            if (track != null && MediaAction.SEEK in state.supportedActions && track.durationMs > 0L) {
+                Spacer(Modifier.height(10.dp))
+                SeekBar(positionMs, track.durationMs, accent, onSeek)
+            }
+
+            Spacer(Modifier.height(10.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = onPrev,
+                    enabled = MediaAction.PREVIOUS in state.supportedActions,
+                    modifier = Modifier.size(58.dp)
+                ) {
+                    Icon(
+                        Icons.Rounded.SkipPrevious,
+                        "Previous track",
+                        tint = titleColor.copy(alpha = if (MediaAction.PREVIOUS in state.supportedActions) 1f else 0.35f),
+                        modifier = Modifier.size(34.dp)
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = 22.dp)
+                        .size(68.dp)
+                        .shadow(10.dp, CircleShape)
+                        .background(Color(0xFFFFF2E2), CircleShape)
+                        .clickable(enabled = state.isActive) {
+                            if (state.isPlaying) onPause() else onPlay()
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        if (state.isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
+                        if (state.isPlaying) "Pause" else "Play",
+                        tint = Color(0xFF71372D),
+                        modifier = Modifier.size(38.dp)
+                    )
+                }
+                IconButton(
+                    onClick = onNext,
+                    enabled = MediaAction.NEXT in state.supportedActions,
+                    modifier = Modifier.size(58.dp)
+                ) {
+                    Icon(
+                        Icons.Rounded.SkipNext,
+                        "Next track",
+                        tint = titleColor.copy(alpha = if (MediaAction.NEXT in state.supportedActions) 1f else 0.35f),
+                        modifier = Modifier.size(34.dp)
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(10.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp))
+                    .background(Color.Black.copy(alpha = 0.15f)).padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                PlayerNavAction(Icons.Rounded.LibraryMusic, "Sources", onOpenSources)
+                PlayerNavAction(Icons.Rounded.Palette, "Looks", onOpenCustomize)
+                PlayerNavAction(Icons.Rounded.Settings, "Settings", onOpenSettings)
+            }
+        }
+    }
+}
+
+@Composable
+private fun PlayerNavAction(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, onClick: () -> Unit) {
+    TextButton(onClick = onClick) {
+        Icon(icon, contentDescription = null, tint = Color(0xFFFFE8CF), modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(7.dp))
+        Text(label, color = Color(0xFFFFE8CF), style = MaterialTheme.typography.labelLarge)
     }
 }
 
@@ -208,27 +436,20 @@ fun VinylRecord(
     grooveIntensity: Float,
     modifier: Modifier = Modifier
 ) {
-    // Rotation animation
-    val infiniteTransition = rememberInfiniteTransition(label = "vinyl")
-    val rotation by infiniteTransition.animateFloat(
-        initialValue   = 0f,
-        targetValue    = 360f,
-        animationSpec  = infiniteRepeatable(
-            animation  = tween(durationMillis = 3000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "rotation"
-    )
-    val targetRotation = if (isPlaying) rotation else 0f
-    val animatedRotation by animateFloatAsState(
-        targetValue   = targetRotation,
-        animationSpec = tween(durationMillis = 500, easing = EaseInOutSine),
-        label         = "smoothRotation"
-    )
+    // Stop the motor where it is when paused; do not animate a hidden/idle record.
+    val rotation = remember { Animatable(0f) }
+    LaunchedEffect(isPlaying) {
+        while (isActive && isPlaying) {
+            val remainder = 360f - (rotation.value % 360f)
+            val duration = (3_000f * remainder / 360f).toInt().coerceAtLeast(120)
+            rotation.animateTo(rotation.value + remainder, tween(duration, easing = LinearEasing))
+            if (rotation.value >= 360f) rotation.snapTo(rotation.value % 360f)
+        }
+    }
 
     Canvas(
         modifier = modifier
-            .rotate(animatedRotation)
+            .rotate(rotation.value)
             .shadow(elevation = 24.dp, shape = CircleShape, clip = false)
     ) {
         val r = size.minDimension / 2f
@@ -594,49 +815,74 @@ private fun EmptyPlayerContent(theme: VinylTheme, onOpenSources: () -> Unit, onO
 
 @Composable
 private fun PermissionScreen(onOpenSettings: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+    Box(
+        modifier = Modifier.fillMaxSize().background(
+            Brush.verticalGradient(listOf(Color(0xFFE98850), Color(0xFFB8523B), Color(0xFF351D20)))
+        ),
+        contentAlignment = Alignment.Center
     ) {
-        Icon(
-            Icons.Rounded.MusicNote,
-            contentDescription = null,
-            tint     = Color.White.copy(alpha = 0.7f),
-            modifier = Modifier.size(72.dp)
-        )
-        Spacer(Modifier.height(24.dp))
-        Text(
-            "Notification Access Required",
-            style  = MaterialTheme.typography.headlineSmall,
-            color  = Color.White,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
-        Spacer(Modifier.height(12.dp))
-        Text(
-            "VinylFlow needs Notification Listener access to detect music from other apps. " +
-            "Your notification content is never read — only the media session is used.",
-            style  = MaterialTheme.typography.bodyMedium,
-            color  = Color.White.copy(alpha = 0.65f),
-            textAlign = TextAlign.Center,
-            lineHeight = 22.sp
-        )
-        Spacer(Modifier.height(32.dp))
-        Button(
-            onClick = onOpenSettings,
-            colors  = ButtonDefaults.buttonColors(containerColor = Color(0xFF7C6AF7))
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp, vertical = 28.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Open Notification Settings")
+            Box(
+                modifier = Modifier.size(190.dp).clip(CircleShape)
+                    .background(Color(0xFFFFB873)).padding(14.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                VinylRecord(
+                    isPlaying = false,
+                    artwork = null,
+                    recordColor = Color(0xFF151519),
+                    grooveColor = Color(0xFF38383C),
+                    labelColor = Color(0xFFE58350),
+                    accentColor = Color(0xFFFFE0C1),
+                    showGrooves = true,
+                    grooveIntensity = 0.65f,
+                    modifier = Modifier.fillMaxSize()
+                )
+                Icon(
+                    Icons.Rounded.MusicNote,
+                    contentDescription = null,
+                    tint = Color(0xFFFFF3E5),
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+            Spacer(Modifier.height(26.dp))
+            Text(
+                "Let the music in",
+                style = MaterialTheme.typography.headlineMedium,
+                color = Color(0xFFFFF3E5),
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(10.dp))
+            Text(
+                "Allow notification access so VinylFlow can find the song playing in your music app and control it from the turntable.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color(0xFFFFF3E5).copy(alpha = 0.78f),
+                textAlign = TextAlign.Center,
+                lineHeight = 24.sp
+            )
+            Spacer(Modifier.height(25.dp))
+            Button(
+                onClick = onOpenSettings,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFFFF2E2),
+                    contentColor = Color(0xFF71372D)
+                ),
+                shape = RoundedCornerShape(22.dp),
+                modifier = Modifier.fillMaxWidth().height(54.dp)
+            ) {
+                Text("Connect to music", fontWeight = FontWeight.Bold)
+            }
+            Spacer(Modifier.height(12.dp))
+            Text(
+                "VinylFlow uses media-session details and does not read notification text.",
+                style = MaterialTheme.typography.labelMedium,
+                color = Color(0xFFFFF3E5).copy(alpha = 0.62f),
+                textAlign = TextAlign.Center
+            )
         }
-        Spacer(Modifier.height(12.dp))
-        Text(
-            "Settings → Apps → Special access → Notification access → VinylFlow ✓",
-            style = MaterialTheme.typography.labelSmall,
-            color = Color.White.copy(alpha = 0.4f),
-            textAlign = TextAlign.Center
-        )
     }
 }

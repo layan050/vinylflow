@@ -10,6 +10,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import com.example.vinylflow.domain.model.*
+import com.example.vinylflow.widget.VinylWidgetProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -73,18 +74,22 @@ class MediaSessionRepository(private val context: Context) {
             onSessionsChanged(controllers)
             sessionManager?.addOnActiveSessionsChangedListener(sessionListener, listenerComponent, mainHandler)
             _mediaState.value = _mediaState.value.copy(permissionGranted = true)
+            refreshWidgets()
             Log.d(TAG, "Initialized with ${controllers.size} active sessions")
         } catch (e: SecurityException) {
             Log.w(TAG, "Permission denied: ${e.message}")
             _mediaState.value = MediaState.PermissionRequired
+            refreshWidgets()
         } catch (e: Exception) {
             Log.e(TAG, "Init error: ${e.message}")
             _mediaState.value = MediaState.PermissionRequired
+            refreshWidgets()
         }
     }
 
     fun onPermissionDenied() {
         _mediaState.value = MediaState.PermissionRequired
+        refreshWidgets()
     }
 
     // ── Session Management ─────────────────────────────────────────────────────
@@ -120,6 +125,7 @@ class MediaSessionRepository(private val context: Context) {
     ) {
         if (controller == null) {
             _mediaState.value = _mediaState.value.copy(isActive = false, track = null)
+            refreshWidgets()
             return
         }
 
@@ -147,12 +153,14 @@ class MediaSessionRepository(private val context: Context) {
             isActive        = true,
             permissionGranted = true
         )
+        refreshWidgets()
     }
 
     private fun handleSessionDestroyed() {
         activeController?.unregisterCallback(controllerCallback)
         activeController = null
         _mediaState.value = _mediaState.value.copy(isActive = false, track = null, source = null)
+        refreshWidgets()
     }
 
     // ── Transport Controls ─────────────────────────────────────────────────────
@@ -199,6 +207,11 @@ class MediaSessionRepository(private val context: Context) {
             context.packageManager.getApplicationInfo(pkg, 0)
         ).toString()
     } catch (e: Exception) { pkg }
+
+    private fun refreshWidgets() {
+        try { VinylWidgetProvider.updateAll(context) }
+        catch (e: Exception) { Log.w(TAG, "Widget refresh failed: ${e.message}") }
+    }
 
     fun cleanup() {
         try { sessionManager?.removeOnActiveSessionsChangedListener(sessionListener) }

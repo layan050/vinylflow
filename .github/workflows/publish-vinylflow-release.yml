@@ -1,0 +1,30 @@
+name: Publish VinylFlow APKs
+
+on:
+  push:
+    tags:
+      - v1.1.0
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out tagged APKs
+        uses: actions/checkout@v4
+
+      - name: Publish all device APKs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          gh release create "$RELEASE_TAG" dist/*.apk \
+            --title "VinylFlow $RELEASE_TAG" \
+            --notes "VinylFlow 1.1.0 adds the MD Vinyl-inspired player design and a home-screen music widget. Includes a universal APK and ABI-specific builds for Android phones and tablets."
+          assets="$(gh release view "$RELEASE_TAG" --json assets --jq '.assets[].name')"
+          printf '%s\n' "$assets"
+          count="$(printf '%s\n' "$assets" | sed '/^$/d' | wc -l)"
+          test "$count" -eq 5

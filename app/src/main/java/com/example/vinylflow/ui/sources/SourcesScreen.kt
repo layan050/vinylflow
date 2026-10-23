@@ -37,7 +37,7 @@ fun SourcesScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                Brush.verticalGradient(listOf(Color(0xFF060610), Color(0xFF0D0D1A)))
+                Brush.verticalGradient(listOf(Color(0xFF351D20), Color(0xFF241416)))
             )
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -166,7 +166,7 @@ private fun SourceRow(
             .clickable(onClick = onSelect),
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected)
-                Color(0xFF7C6AF7).copy(alpha = 0.18f)
+                Color(0xFFD97847).copy(alpha = 0.18f)
             else
                 Color.White.copy(alpha = 0.06f)
         )
@@ -180,10 +180,10 @@ private fun SourceRow(
             Box(
                 modifier = Modifier
                     .size(44.dp)
-                    .background(Color(0xFF7C6AF7).copy(alpha = 0.25f), CircleShape),
+                    .background(Color(0xFFD97847).copy(alpha = 0.25f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Rounded.MusicNote, null, tint = Color(0xFF7C6AF7), modifier = Modifier.size(22.dp))
+                Icon(Icons.Rounded.MusicNote, null, tint = Color(0xFFD97847), modifier = Modifier.size(22.dp))
             }
 
             Column(modifier = Modifier.weight(1f)) {
@@ -215,7 +215,7 @@ private fun SourceRow(
             }
 
             if (isSelected) {
-                Icon(Icons.Rounded.CheckCircle, null, tint = Color(0xFF7C6AF7), modifier = Modifier.size(20.dp))
+                Icon(Icons.Rounded.CheckCircle, null, tint = Color(0xFFD97847), modifier = Modifier.size(20.dp))
             }
         }
     }
@@ -265,14 +265,14 @@ private fun EmptySessionsCard() {
 private fun CompatibilityNote() {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A2E))
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF171313))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Icon(Icons.Rounded.Info, null, tint = Color(0xFF7C6AF7), modifier = Modifier.size(18.dp))
+                Icon(Icons.Rounded.Info, null, tint = Color(0xFFD97847), modifier = Modifier.size(18.dp))
                 Text("Compatibility", style = MaterialTheme.typography.labelLarge, color = Color.White)
             }
             Spacer(Modifier.height(8.dp))

@@ -8,7 +8,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import com.example.vinylflow.domain.model.PRESET_MIDNIGHT_BLACK
+import com.example.vinylflow.domain.model.PRESET_VINTAGE_CREAM
 import com.example.vinylflow.domain.model.VinylTheme
 import com.example.vinylflow.ui.customize.CustomizeScreen
 import com.example.vinylflow.ui.player.PlayerScreen
@@ -33,7 +33,7 @@ sealed interface Dest : NavKey {
 @Composable
 fun MainNavigation(activity: android.app.Activity) {
     val backStack = rememberNavBackStack(Dest.Player)
-    var theme by remember { mutableStateOf(PRESET_MIDNIGHT_BLACK) }
+    var theme by remember { mutableStateOf(PRESET_VINTAGE_CREAM) }
 
     // Auto-detect tablet (Xiaomi Pad 7 → Expanded width in landscape)
     val windowSizeClass = calculateWindowSizeClass(activity)

@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">VinylFlow</string>
+    <string name="widget_description">Vinyl player controls and album art</string>
 </resources>

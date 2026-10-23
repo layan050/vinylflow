@@ -5,6 +5,8 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
@@ -28,7 +30,7 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Brush.verticalGradient(listOf(Color(0xFF060610), Color(0xFF0D0D1A))))
+            .background(Brush.verticalGradient(listOf(Color(0xFF351D20), Color(0xFF241416))))
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Top bar
@@ -53,9 +55,21 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 20.dp),
+                    .padding(horizontal = 20.dp)
+                    .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                SectionHeader("Home screen widget")
+                SettingsCard {
+                    SettingsRow(
+                        icon = Icons.Rounded.Widgets,
+                        iconTint = Color(0xFFD97847),
+                        title = "Add VinylFlow player",
+                        subtitle = "Long-press the home screen → Widgets → VinylFlow → drag the player onto your screen",
+                        onClick = {}
+                    )
+                }
+
                 // Permission status
                 SectionHeader("Permissions")
                 SettingsCard {
@@ -113,7 +127,7 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
                 SettingsCard {
                     SettingsRow(
                         icon     = Icons.Rounded.HelpOutline,
-                        iconTint = Color(0xFF7C6AF7),
+                        iconTint = Color(0xFFD97847),
                         title    = "App not detecting music?",
                         subtitle = "1. Enable Notification Listener\n2. Enable AutoStart (Xiaomi)\n3. Play music then reopen app",
                         onClick  = {}
@@ -133,9 +147,9 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
                 SettingsCard {
                     SettingsRow(
                         icon     = Icons.Rounded.Album,
-                        iconTint = Color(0xFF7C6AF7),
+                        iconTint = Color(0xFFD97847),
                         title    = "VinylFlow",
-                        subtitle = "Version 1.0.0 • Android Vinyl Player",
+                        subtitle = "Version 1.1.0 • Android Vinyl Player",
                         onClick  = {}
                     )
                 }
