@@ -1,0 +1,29 @@
+name: Refresh VinylFlow release assets
+
+on:
+  push:
+    tags:
+      - refresh-vinylflow-release-v1.0.0
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out APK files
+        uses: actions/checkout@v4
+
+      - name: Replace release APKs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: v1.0.0
+        run: |
+          set -euo pipefail
+          gh release upload "$RELEASE_TAG" dist/*.apk --clobber
+          gh release delete-asset "$RELEASE_TAG" "VinylFlow-v1.0.0-debug.apk" --yes
+          assets="$(gh release view "$RELEASE_TAG" --json assets --jq '.assets[].name')"
+          printf '%s\n' "$assets"
+          count="$(printf '%s\n' "$assets" | sed '/^$/d' | wc -l)"
+          test "$count" -eq 5
