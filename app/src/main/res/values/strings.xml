@@ -1,13 +1,9 @@
 <resources>
     <string name="app_name">VinylFlow</string>
-    <string name="widget_mini_name">VinylFlow Mini · Violet</string>
-    <string name="widget_mini_description">A compact violet vinyl player with spinning album art and playback controls.</string>
-    <string name="widget_player_name">VinylFlow Player · Cream</string>
-    <string name="widget_player_description">A cream turntable player with track details and music controls. Resize it on your home screen.</string>
-    <string name="widget_turntable_name">VinylFlow Turntable · Silver</string>
-    <string name="widget_turntable_description">A large silver turntable with a spinning vinyl, tonearm and playback controls.</string>
     <string name="widget_ipod_name">VinylFlow iPod</string>
-    <string name="widget_ipod_description">A classic pocket music player with album art and click-wheel controls. Resize for different home screen layouts.</string>
+    <string name="widget_ipod_description">A compact classic music player with album art and click-wheel controls. Resize it to fit your home screen.</string>
     <string name="widget_cassette_name">VinylFlow Cassette</string>
-    <string name="widget_cassette_description">A retro cassette player showing the current track. Resize it to fit your home screen.</string>
+    <string name="widget_cassette_description">A compact cassette player showing your current music. Resize it to fit your home screen.</string>
+    <string name="widget_strip_name">VinylFlow Vinyl Strip</string>
+    <string name="widget_strip_description">A wide music strip with album art behind a smoothly rotating vinyl record.</string>
 </resources>

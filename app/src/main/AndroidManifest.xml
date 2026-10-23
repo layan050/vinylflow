@@ -45,33 +45,6 @@
             </intent-filter>
         </service>
 
-        <receiver android:name=".widget.VinylMiniWidgetProvider" android:label="@string/widget_mini_name" android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/vinyl_widget_mini_info" />
-        </receiver>
-
-        <receiver android:name=".widget.VinylPlayerWidgetProvider" android:label="@string/widget_player_name" android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/vinyl_widget_player_info" />
-        </receiver>
-
-        <receiver android:name=".widget.VinylTurntableWidgetProvider" android:label="@string/widget_turntable_name" android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/vinyl_widget_turntable_info" />
-        </receiver>
-
         <receiver android:name=".widget.VinylIpodWidgetProvider" android:label="@string/widget_ipod_name" android:exported="true">
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/vinyl_widget_ipod_info" />
@@ -79,6 +52,10 @@
         <receiver android:name=".widget.VinylCassetteWidgetProvider" android:label="@string/widget_cassette_name" android:exported="true">
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/vinyl_widget_cassette_info" />
+        </receiver>
+        <receiver android:name=".widget.VinylStripWidgetProvider" android:label="@string/widget_strip_name" android:exported="true">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/vinyl_widget_strip_info" />
         </receiver>
 
         <receiver

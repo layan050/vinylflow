@@ -108,33 +108,42 @@ private fun TabletMainLayout(
 
     Row(modifier = Modifier.fillMaxSize()) {
 
-        // ── Left Panel: Vinyl Record ──────────────────────────────────────────
-        Box(
+        // ── Left Panel: album cover behind the vinyl ──────────────────────────
+        val cover = if (theme.showArtwork) track?.artworkBitmap else null
+        BoxWithConstraints(
             modifier = Modifier
                 .weight(0.48f)
                 .fillMaxHeight()
                 .padding(34.dp)
                 .clip(androidx.compose.foundation.shape.RoundedCornerShape(34.dp))
-                .background(Brush.linearGradient(if (theme.darkMode) listOf(Color(0xFF42434A), Color(0xFF292A30), Color(0xFF1F2025)) else listOf(Color(0xFFF4F4F2), Color(0xFFD0D3D6), Color(0xFFBFC2C6)))),
+                .background(if (theme.darkMode) Color(0xFF25262B) else Color(0xFFD0D3D6)),
             contentAlignment = Alignment.Center
         ) {
-            Row(Modifier.fillMaxSize().padding(22.dp), verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.weight(0.38f).aspectRatio(1f).padding(end = 18.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(18.dp)).background(ink.copy(alpha = 0.08f)), contentAlignment = Alignment.Center) {
-                    val cover = if (theme.showArtwork) track?.artworkBitmap else null
-                    if (cover != null) Image(cover.asImageBitmap(), "Album cover", Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                    else Icon(Icons.Rounded.Album, null, tint = muted, modifier = Modifier.size(56.dp))
-                }
-                Box(Modifier.weight(0.62f).fillMaxHeight(), contentAlignment = Alignment.Center) {
-                    VinylRecord(
-                        isPlaying = state.isPlaying, artwork = null,
-                        labelTitle = track?.displayTitle.orEmpty(), labelArtist = track?.displayArtist.orEmpty(),
-                        recordColor = Color(theme.recordColor), grooveColor = Color(theme.grooveColor),
-                        labelColor = Color(theme.labelColor), accentColor = accent,
-                        showGrooves = theme.showGrooves, grooveIntensity = theme.grooveIntensity,
-                        modifier = Modifier.fillMaxHeight().aspectRatio(1f)
-                    )
-                    if (theme.showToneArm) ToneArm(isPlaying = state.isPlaying, armColor = Color(theme.toneArmColor))
-                }
+            if (cover != null) {
+                Image(cover.asImageBitmap(), "Album artwork background", Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.16f), Color.Transparent, Color.Black.copy(alpha = 0.30f)))))
+            } else {
+                Box(Modifier.fillMaxSize().background(Brush.linearGradient(if (theme.darkMode) listOf(Color(0xFF42434A), Color(0xFF292A30), Color(0xFF1F2025)) else listOf(Color(0xFFF4F4F2), Color(0xFFD0D3D6), Color(0xFFBFC2C6)))))
+            }
+            Text(
+                "VINYLFLOW  ·  33⅓ RPM",
+                Modifier.align(Alignment.TopStart).padding(start = 24.dp, top = 20.dp),
+                color = if (cover != null) Color.White.copy(alpha = 0.92f) else muted,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.4.sp
+            )
+            val discSize = minOf(maxWidth * 0.88f, maxHeight * 0.80f)
+            Box(Modifier.size(discSize).offset(x = maxWidth * 0.13f), contentAlignment = Alignment.Center) {
+                VinylRecord(
+                    isPlaying = state.isPlaying, artwork = cover,
+                    labelTitle = track?.displayTitle.orEmpty(), labelArtist = track?.displayArtist.orEmpty(),
+                    recordColor = Color(theme.recordColor), grooveColor = Color(theme.grooveColor),
+                    labelColor = Color(theme.labelColor), accentColor = accent,
+                    showGrooves = theme.showGrooves, grooveIntensity = theme.grooveIntensity,
+                    modifier = Modifier.fillMaxSize()
+                )
+                if (theme.showToneArm) ToneArm(isPlaying = state.isPlaying, armColor = Color(theme.toneArmColor))
             }
         }
 

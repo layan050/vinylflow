@@ -1,19 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/widget_root" android:layout_width="match_parent" android:layout_height="match_parent"
-    android:orientation="vertical" android:gravity="center" android:background="#FFE5E4E1" android:padding="10dp">
-    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:background="@drawable/widget_cassette_body" android:padding="6dp">
-        <ImageView android:layout_width="match_parent" android:layout_height="36dp" android:layout_gravity="top|center_horizontal" android:layout_marginStart="10dp" android:layout_marginEnd="10dp" android:background="@drawable/widget_cassette_label" android:contentDescription="Cassette label" />
-        <TextView android:id="@+id/widget_source" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
-        <TextView android:id="@+id/widget_track_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_gravity="top|center_horizontal" android:layout_marginStart="48dp" android:layout_marginEnd="48dp" android:layout_marginTop="4dp" android:gravity="center" android:text="SIDE A · NOTHING PLAYING" android:textColor="#FF28282A" android:textSize="9sp" android:textStyle="bold" android:ellipsize="end" android:maxLines="1" />
-        <TextView android:id="@+id/widget_track_artist" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_gravity="top|center_horizontal" android:layout_marginStart="48dp" android:layout_marginEnd="48dp" android:layout_marginTop="19dp" android:gravity="center" android:text="VINYLFLOW MIXTAPE" android:textColor="#FF535357" android:textSize="8sp" android:ellipsize="end" android:maxLines="1" />
-        <ImageView android:layout_width="46dp" android:layout_height="46dp" android:layout_gravity="bottom|start" android:layout_marginStart="8dp" android:layout_marginBottom="3dp" android:background="@drawable/widget_cassette_reel" android:contentDescription="Cassette reel" />
-        <ImageView android:layout_width="46dp" android:layout_height="46dp" android:layout_gravity="bottom|end" android:layout_marginEnd="8dp" android:layout_marginBottom="3dp" android:background="@drawable/widget_cassette_reel" android:contentDescription="Cassette reel" />
-        <ImageView android:layout_width="match_parent" android:layout_height="20dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginStart="24dp" android:layout_marginEnd="24dp" android:layout_marginBottom="7dp" android:background="#FF29292D" android:contentDescription="Cassette tape window" />
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="#FFE5E4E1"
+    android:padding="8dp">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@drawable/widget_cassette_body"
+        android:padding="5dp">
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_gravity="top|center_horizontal"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/widget_cassette_label"
+            android:contentDescription="Cassette label" />
+        <TextView
+            android:id="@+id/widget_source"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+        <TextView
+            android:id="@+id/widget_track_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal"
+            android:layout_marginStart="38dp"
+            android:layout_marginEnd="38dp"
+            android:layout_marginTop="3dp"
+            android:gravity="center"
+            android:text="SIDE A · NOTHING PLAYING"
+            android:textColor="#FF28282A"
+            android:textSize="8sp"
+            android:textStyle="bold"
+            android:ellipsize="end"
+            android:maxLines="1" />
+        <TextView
+            android:id="@+id/widget_track_artist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal"
+            android:layout_marginStart="38dp"
+            android:layout_marginEnd="38dp"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:text="VINYLFLOW MIXTAPE"
+            android:textColor="#FF535357"
+            android:textSize="7sp"
+            android:ellipsize="end"
+            android:maxLines="1" />
+        <ImageView
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_gravity="bottom|start"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="2dp"
+            android:background="@drawable/widget_cassette_reel"
+            android:contentDescription="Cassette reel" />
+        <ImageView
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="2dp"
+            android:background="@drawable/widget_cassette_reel"
+            android:contentDescription="Cassette reel" />
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="14dp"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="5dp"
+            android:background="#FF29292D"
+            android:contentDescription="Cassette tape window" />
     </FrameLayout>
-    <LinearLayout android:layout_width="wrap_content" android:layout_height="38dp" android:layout_marginTop="4dp" android:orientation="horizontal" android:gravity="center">
-        <ImageButton android:id="@+id/widget_previous" android:layout_width="42dp" android:layout_height="38dp" android:background="@android:color/transparent" android:src="@android:drawable/ic_media_previous" android:tint="#FF35353A" android:padding="9dp" android:contentDescription="Previous" />
-        <ImageButton android:id="@+id/widget_play_pause" android:layout_width="42dp" android:layout_height="38dp" android:background="@android:color/transparent" android:src="@android:drawable/ic_media_play" android:tint="#FF25252A" android:padding="9dp" android:contentDescription="Play or pause" />
-        <ImageButton android:id="@+id/widget_next" android:layout_width="42dp" android:layout_height="38dp" android:background="@android:color/transparent" android:src="@android:drawable/ic_media_next" android:tint="#FF35353A" android:padding="9dp" android:contentDescription="Next" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_marginTop="3dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+        <ImageButton
+            android:id="@+id/widget_previous"
+            android:layout_width="34dp"
+            android:layout_height="30dp"
+            android:background="@android:color/transparent"
+            android:src="@android:drawable/ic_media_previous"
+            android:tint="#FF35353A"
+            android:padding="7dp"
+            android:contentDescription="Previous" />
+        <ImageButton
+            android:id="@+id/widget_play_pause"
+            android:layout_width="34dp"
+            android:layout_height="30dp"
+            android:background="@android:color/transparent"
+            android:src="@android:drawable/ic_media_play"
+            android:tint="#FF25252A"
+            android:padding="7dp"
+            android:contentDescription="Play or pause" />
+        <ImageButton
+            android:id="@+id/widget_next"
+            android:layout_width="34dp"
+            android:layout_height="30dp"
+            android:background="@android:color/transparent"
+            android:src="@android:drawable/ic_media_next"
+            android:tint="#FF35353A"
+            android:padding="7dp"
+            android:contentDescription="Next" />
     </LinearLayout>
 </LinearLayout>

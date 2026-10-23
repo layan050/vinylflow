@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_strip_placeholder"
+    android:padding="4dp">
+
+    <ImageView
+        android:id="@+id/widget_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/widget_strip_placeholder"
+        android:scaleType="centerCrop"
+        android:contentDescription="Album artwork background" />
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/widget_strip_scrim"
+        android:contentDescription="Artwork contrast overlay" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="12dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp">
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingEnd="4dp">
+            <TextView
+                android:id="@+id/widget_source"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="NOW PLAYING"
+                android:textColor="#DDFFFFFF"
+                android:textSize="8sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.12"
+                android:maxLines="1"
+                android:ellipsize="end" />
+            <TextView
+                android:id="@+id/widget_track_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Nothing playing"
+                android:textColor="#FFFFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end" />
+            <TextView
+                android:id="@+id/widget_track_artist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Start music to spin"
+                android:textColor="#E6FFFFFF"
+                android:textSize="11sp"
+                android:maxLines="1"
+                android:ellipsize="end" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="34dp"
+                android:layout_marginTop="4dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <ImageButton
+                    android:id="@+id/widget_previous"
+                    android:layout_width="26dp"
+                    android:layout_height="30dp"
+                    android:background="@android:color/transparent"
+                    android:src="@android:drawable/ic_media_previous"
+                    android:tint="#FFFFFFFF"
+                    android:padding="7dp"
+                    android:contentDescription="Previous track" />
+                <ImageButton
+                    android:id="@+id/widget_play_pause"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:background="@drawable/widget_strip_play_button"
+                    android:src="@android:drawable/ic_media_play"
+                    android:tint="#FFFFFFFF"
+                    android:padding="7dp"
+                    android:contentDescription="Play or pause" />
+                <ImageButton
+                    android:id="@+id/widget_next"
+                    android:layout_width="26dp"
+                    android:layout_height="30dp"
+                    android:background="@android:color/transparent"
+                    android:src="@android:drawable/ic_media_next"
+                    android:tint="#FFFFFFFF"
+                    android:padding="7dp"
+                    android:contentDescription="Next track" />
+            </LinearLayout>
+        </LinearLayout>
+        <ImageView
+            android:id="@+id/widget_record"
+            android:layout_width="92dp"
+            android:layout_height="92dp"
+            android:layout_marginStart="4dp"
+            android:contentDescription="Rotating vinyl record with album artwork" />
+    </LinearLayout>
+</FrameLayout>

@@ -29,13 +29,12 @@ enum class WidgetStyle(
     val accent: Int,
     val controlTint: Int,
     val playTint: Int,
-    val recordMode: RecordMode = RecordMode.VINYL
+    val recordMode: RecordMode = RecordMode.VINYL,
+    val backgroundView: Int? = null
 ) {
-    MINI(R.layout.widget_vinyl_mini, R.string.widget_mini_name, 0xFF6055C8.toInt(), 0xFF4942A9.toInt(), Color.WHITE),
-    PLAYER(R.layout.widget_vinyl, R.string.widget_player_name, 0xFFE58350.toInt(), 0xFF59483E.toInt(), Color.WHITE),
-    TURNTABLE(R.layout.widget_vinyl_turntable, R.string.widget_turntable_name, 0xFF5F62C9.toInt(), 0xFF30323A.toInt(), Color.WHITE),
     IPOD(R.layout.widget_vinyl_ipod, R.string.widget_ipod_name, 0xFFBFC3CC.toInt(), Color.WHITE, Color.WHITE, RecordMode.ALBUM_ART),
-    CASSETTE(R.layout.widget_vinyl_cassette, R.string.widget_cassette_name, 0xFFBFC3CC.toInt(), 0xFF25252A.toInt(), 0xFF17171B.toInt(), RecordMode.NONE)
+    CASSETTE(R.layout.widget_vinyl_cassette, R.string.widget_cassette_name, 0xFFBFC3CC.toInt(), 0xFF25252A.toInt(), 0xFF17171B.toInt(), RecordMode.NONE),
+    STRIP(R.layout.widget_vinyl_strip, R.string.widget_strip_name, 0xFFB6AFFF.toInt(), Color.WHITE, Color.WHITE, RecordMode.VINYL, R.id.widget_background)
 }
 
 enum class RecordMode { VINYL, ALBUM_ART, NONE }
@@ -50,11 +49,9 @@ abstract class VinylBaseWidgetProvider : AppWidgetProvider() {
 
     companion object {
         private val widgetProviders = listOf(
-            VinylMiniWidgetProvider::class.java,
-            VinylPlayerWidgetProvider::class.java,
-            VinylTurntableWidgetProvider::class.java,
             VinylIpodWidgetProvider::class.java,
-            VinylCassetteWidgetProvider::class.java
+            VinylCassetteWidgetProvider::class.java,
+            VinylStripWidgetProvider::class.java
         )
 
         fun hasWidgets(context: Context): Boolean {
@@ -64,20 +61,23 @@ abstract class VinylBaseWidgetProvider : AppWidgetProvider() {
             }
         }
 
+        fun hasSpinningWidgets(context: Context): Boolean =
+            AppWidgetManager.getInstance(context)
+                .getAppWidgetIds(ComponentName(context, VinylStripWidgetProvider::class.java))
+                .isNotEmpty()
+
         fun updateAll(context: Context, rotationDegrees: Float = currentRotation(), spinningOnly: Boolean = false) {
             val manager = AppWidgetManager.getInstance(context)
             val controller = activeController(context)
-            val providersToUpdate = if (spinningOnly) widgetProviders.take(3) else widgetProviders
+            val providersToUpdate = if (spinningOnly) listOf(VinylStripWidgetProvider::class.java) else widgetProviders
             providersToUpdate.forEach { provider ->
                 val ids = manager.getAppWidgetIds(ComponentName(context, provider))
                 val style = when (provider) {
-                    VinylMiniWidgetProvider::class.java -> WidgetStyle.MINI
-                    VinylPlayerWidgetProvider::class.java -> WidgetStyle.PLAYER
-                    VinylTurntableWidgetProvider::class.java -> WidgetStyle.TURNTABLE
                     VinylIpodWidgetProvider::class.java -> WidgetStyle.IPOD
-                    else -> WidgetStyle.CASSETTE
+                    VinylCassetteWidgetProvider::class.java -> WidgetStyle.CASSETTE
+                    else -> WidgetStyle.STRIP
                 }
-                ids.forEach { updateWidget(context, manager, it, style, controller, rotationDegrees) }
+                ids.forEach { updateWidget(context, manager, it, style, controller, rotationDegrees, spinningOnly) }
             }
         }
 
@@ -87,9 +87,21 @@ abstract class VinylBaseWidgetProvider : AppWidgetProvider() {
             id: Int,
             style: WidgetStyle,
             controller: MediaController?,
-            rotationDegrees: Float = currentRotation()
+            rotationDegrees: Float = currentRotation(),
+            spinningOnly: Boolean = false
         ) {
             val views = RemoteViews(context.packageName, style.layout)
+            if (spinningOnly && style.recordMode == RecordMode.VINYL) {
+                val metadata = controller?.metadata
+                views.setImageViewBitmap(R.id.widget_record, createSpinningRecord(metadata?.let {
+                    it.getBitmap(MediaMetadata.METADATA_KEY_ART)
+                        ?: it.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
+                }, rotationDegrees, style.accent,
+                    metadata?.getString(MediaMetadata.METADATA_KEY_TITLE),
+                    metadata?.getString(MediaMetadata.METADATA_KEY_ARTIST)))
+                manager.partiallyUpdateAppWidget(id, views)
+                return
+            }
             val metadata = controller?.metadata
             val playback = controller?.playbackState
             val title = metadata?.getString(MediaMetadata.METADATA_KEY_TITLE)
@@ -108,8 +120,11 @@ abstract class VinylBaseWidgetProvider : AppWidgetProvider() {
 
             val artwork = metadata?.getBitmap(MediaMetadata.METADATA_KEY_ART)
                 ?: metadata?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
+            style.backgroundView?.let { backgroundId ->
+                views.setImageViewBitmap(backgroundId, createArtworkBackdrop(artwork))
+            }
             when (style.recordMode) {
-                RecordMode.VINYL -> views.setImageViewBitmap(R.id.widget_record, createSpinningRecord(artwork, rotationDegrees, style.accent))
+                RecordMode.VINYL -> views.setImageViewBitmap(R.id.widget_record, createSpinningRecord(artwork, rotationDegrees, style.accent, title, artist))
                 RecordMode.ALBUM_ART -> if (artwork != null && !artwork.isRecycled) {
                     // Media apps often expose multi-megabyte covers. Keep RemoteViews
                     // below Binder's transaction limit by sending a small square crop.
@@ -165,6 +180,48 @@ abstract class VinylBaseWidgetProvider : AppWidgetProvider() {
             return thumbnail
         }
 
+        private fun createArtworkBackdrop(artwork: Bitmap?, width: Int = 480, height: Int = 240): Bitmap {
+            val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(bitmap)
+            val bounds = android.graphics.RectF(0f, 0f, width.toFloat(), height.toFloat())
+            val clip = android.graphics.Path().apply {
+                addRoundRect(bounds, 28f, 28f, android.graphics.Path.Direction.CW)
+            }
+            canvas.save()
+            canvas.clipPath(clip)
+            val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
+            if (artwork != null && !artwork.isRecycled) {
+                val scale = maxOf(width.toFloat() / artwork.width, height.toFloat() / artwork.height)
+                val scaledWidth = artwork.width * scale
+                val scaledHeight = artwork.height * scale
+                paint.shader = BitmapShader(artwork, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP).apply {
+                    setLocalMatrix(Matrix().apply {
+                        setScale(scale, scale)
+                        postTranslate((width - scaledWidth) / 2f, (height - scaledHeight) / 2f)
+                    })
+                }
+                canvas.drawRect(bounds, paint)
+                paint.shader = null
+            } else {
+                paint.shader = android.graphics.LinearGradient(
+                    0f, 0f, width.toFloat(), height.toFloat(),
+                    intArrayOf(0xFF42424A.toInt(), 0xFF222329.toInt(), 0xFF554150.toInt()),
+                    null, Shader.TileMode.CLAMP
+                )
+                canvas.drawRect(bounds, paint)
+                paint.shader = null
+            }
+            paint.color = 0x4D000000
+            canvas.drawRect(bounds, paint)
+            paint.shader = android.graphics.LinearGradient(
+                0f, 0f, width * 0.75f, 0f,
+                intArrayOf(0xB3000000.toInt(), 0x00000000), null, Shader.TileMode.CLAMP
+            )
+            canvas.drawRect(bounds, paint)
+            canvas.restore()
+            return bitmap
+        }
+
         private fun openApp(context: Context): PendingIntent = PendingIntent.getActivity(
             context, 0, Intent(context, MainActivity::class.java),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
@@ -181,7 +238,7 @@ abstract class VinylBaseWidgetProvider : AppWidgetProvider() {
             )
         }
 
-        private fun createSpinningRecord(artwork: Bitmap?, degrees: Float, accent: Int): Bitmap {
+        private fun createSpinningRecord(artwork: Bitmap?, degrees: Float, accent: Int, title: String? = null, artist: String? = null): Bitmap {
             val side = 256
             val center = side / 2f
             val record = Bitmap.createBitmap(side, side, Bitmap.Config.ARGB_8888)
@@ -216,6 +273,20 @@ abstract class VinylBaseWidgetProvider : AppWidgetProvider() {
                 canvas.drawCircle(center, center, labelRadius, paint)
             }
 
+            if (!title.isNullOrBlank() || !artist.isNullOrBlank()) {
+                val labelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = Color.WHITE
+                    textAlign = Paint.Align.CENTER
+                    textSize = 11f
+                    typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.BOLD)
+                    setShadowLayer(2f, 0f, 1f, Color.BLACK)
+                }
+                canvas.drawText(title.orEmpty().take(14), center, center + 2f, labelPaint)
+                labelPaint.textSize = 8f
+                labelPaint.typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.NORMAL)
+                canvas.drawText(artist.orEmpty().take(16), center, center + 14f, labelPaint)
+            }
+
             paint.color = 0xFF111114.toInt()
             canvas.drawCircle(center, center, 4f, paint)
             paint.color = 0x66FFFFFF
@@ -234,24 +305,16 @@ abstract class VinylBaseWidgetProvider : AppWidgetProvider() {
     }
 }
 
-class VinylMiniWidgetProvider : VinylBaseWidgetProvider() {
-    protected override val widgetStyle = WidgetStyle.MINI
-}
-
-class VinylPlayerWidgetProvider : VinylBaseWidgetProvider() {
-    protected override val widgetStyle = WidgetStyle.PLAYER
-}
-
-class VinylTurntableWidgetProvider : VinylBaseWidgetProvider() {
-    protected override val widgetStyle = WidgetStyle.TURNTABLE
-}
-
 class VinylIpodWidgetProvider : VinylBaseWidgetProvider() {
     protected override val widgetStyle = WidgetStyle.IPOD
 }
 
 class VinylCassetteWidgetProvider : VinylBaseWidgetProvider() {
     protected override val widgetStyle = WidgetStyle.CASSETTE
+}
+
+class VinylStripWidgetProvider : VinylBaseWidgetProvider() {
+    protected override val widgetStyle = WidgetStyle.STRIP
 }
 
 class VinylWidgetActionReceiver : android.content.BroadcastReceiver() {

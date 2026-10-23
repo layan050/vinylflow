@@ -50,12 +50,12 @@ class MediaSessionRepository(private val context: Context) {
     private var widgetAnimationRunning = false
     private val widgetSpinTicker = object : Runnable {
         override fun run() {
-            if (!_mediaState.value.isPlaying || !VinylBaseWidgetProvider.hasWidgets(context)) {
+            if (!_mediaState.value.isPlaying || !VinylBaseWidgetProvider.hasSpinningWidgets(context)) {
                 widgetAnimationRunning = false
                 return
             }
             VinylBaseWidgetProvider.updateAll(context, spinningOnly = true)
-            mainHandler.postDelayed(this, 500L)
+            mainHandler.postDelayed(this, 125L)
         }
     }
 
