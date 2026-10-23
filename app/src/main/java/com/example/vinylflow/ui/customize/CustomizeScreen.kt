@@ -26,9 +26,18 @@ import com.example.vinylflow.ui.player.VinylRecord
 fun CustomizeScreen(
     currentTheme: VinylTheme,
     onThemeChange: (VinylTheme) -> Unit,
+    widgetAccent: Long = 0xFFB6AFFF,
+    widgetSurface: Long = 0xFF24242A,
+    widgetShowControls: Boolean = true,
+    widgetShowArtist: Boolean = true,
+    onWidgetAppearanceChange: (Long, Long, Boolean, Boolean) -> Unit = { _, _, _, _ -> },
     onBack: () -> Unit = {}
 ) {
     var theme by remember(currentTheme) { mutableStateOf(currentTheme) }
+    var wAccent by remember(widgetAccent) { mutableLongStateOf(widgetAccent) }
+    var wSurface by remember(widgetSurface) { mutableLongStateOf(widgetSurface) }
+    var wControls by remember(widgetShowControls) { mutableStateOf(widgetShowControls) }
+    var wArtist by remember(widgetShowArtist) { mutableStateOf(widgetShowArtist) }
     val accent = Color(theme.accentColor)
 
     Box(
@@ -64,6 +73,39 @@ fun CustomizeScreen(
                 contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                item {
+                    SectionHeader("Widget Studio · Live Preview")
+                    Row(
+                        Modifier.fillMaxWidth().clip(MaterialTheme.shapes.large)
+                            .background(Color(wSurface)).padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(Modifier.size(72.dp).clip(CircleShape).background(Color(0xFF101014)), contentAlignment = Alignment.Center) {
+                            VinylRecord(true, null, Color(0xFF101014), Color(0xFF29292E), Color(wAccent), Color(wAccent), true, 0.6f, modifier = Modifier.fillMaxSize().padding(3.dp))
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text("Nothing playing", color = Color.White, fontWeight = FontWeight.Bold, maxLines = 1)
+                            if (wArtist) Text("Artist name", color = Color.White.copy(alpha = .65f), maxLines = 1)
+                            if (wControls) Text("◀       ▶       ▶", color = Color(wAccent), modifier = Modifier.padding(top = 6.dp))
+                        }
+                    }
+                    Text("Choose a widget style when adding it from your home screen. Resize it there; the layout adapts automatically.", color = Color.White.copy(alpha = .65f), style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 8.dp))
+                }
+                item {
+                    SectionHeader("Widget Accent Color")
+                    ColorPicker(listOf(0xFFB6AFFF, 0xFFE7A0B5, 0xFF86C9B2, 0xFFFFC477, 0xFF8CB8F5, 0xFFF1F0EA), wAccent) {
+                        wAccent = it; onWidgetAppearanceChange(wAccent, wSurface, wControls, wArtist)
+                    }
+                }
+                item {
+                    SectionHeader("Widget Background")
+                    ColorPicker(listOf(0xFF24242A, 0xFF111114, 0xFF51434B, 0xFF283A43, 0xFFF0EFEC, 0xFFDDD9D2), wSurface) {
+                        wSurface = it; onWidgetAppearanceChange(wAccent, wSurface, wControls, wArtist)
+                    }
+                    ToggleRow("Show artist name", wArtist) { wArtist = it; onWidgetAppearanceChange(wAccent, wSurface, wControls, wArtist) }
+                    ToggleRow("Show playback controls", wControls) { wControls = it; onWidgetAppearanceChange(wAccent, wSurface, wControls, wArtist) }
+                }
                 // Live preview
                 item {
                     Box(

@@ -115,12 +115,26 @@ abstract class VinylBaseWidgetProvider : AppWidgetProvider() {
                 (width < style.compactWidthDp || height < style.compactHeightDp)
             ) compactLayout else style.layout
             val views = RemoteViews(context.packageName, layout)
+            val appearance = context.getSharedPreferences("vinylflow_widget", Context.MODE_PRIVATE)
+            val widgetAccent = appearance.getLong("accent", 0xFFB6AFFF).toInt()
+            val widgetSurface = appearance.getLong("surface", 0xFF24242A).toInt()
+            val showControls = appearance.getBoolean("controls", true)
+            val showArtist = appearance.getBoolean("artist", true)
+            if (style == WidgetStyle.STRIP) {
+                views.setInt(R.id.widget_root, "setBackgroundColor", widgetSurface)
+            } else {
+                views.setInt(R.id.widget_root, "setBackgroundColor", widgetSurface)
+            }
+            views.setViewVisibility(R.id.widget_track_artist, if (showArtist) android.view.View.VISIBLE else android.view.View.GONE)
+            listOf(R.id.widget_previous, R.id.widget_play_pause, R.id.widget_next).forEach { controlId ->
+                views.setViewVisibility(controlId, if (showControls) android.view.View.VISIBLE else android.view.View.GONE)
+            }
             if (spinningOnly && style.recordMode == RecordMode.VINYL) {
                 val metadata = controller?.metadata
                 views.setImageViewBitmap(R.id.widget_record, createSpinningRecord(metadata?.let {
                     it.getBitmap(MediaMetadata.METADATA_KEY_ART)
                         ?: it.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
-                }, rotationDegrees, style.accent,
+                }, rotationDegrees, widgetAccent,
                     metadata?.getString(MediaMetadata.METADATA_KEY_TITLE),
                     metadata?.getString(MediaMetadata.METADATA_KEY_ARTIST)))
                 manager.partiallyUpdateAppWidget(id, views)
@@ -148,7 +162,7 @@ abstract class VinylBaseWidgetProvider : AppWidgetProvider() {
                 views.setImageViewBitmap(backgroundId, createArtworkBackdrop(artwork))
             }
             when (style.recordMode) {
-                RecordMode.VINYL -> views.setImageViewBitmap(R.id.widget_record, createSpinningRecord(artwork, rotationDegrees, style.accent, title, artist))
+                RecordMode.VINYL -> views.setImageViewBitmap(R.id.widget_record, createSpinningRecord(artwork, rotationDegrees, widgetAccent, title, artist))
                 RecordMode.ALBUM_ART -> if (artwork != null && !artwork.isRecycled) {
                     // Media apps often expose multi-megabyte covers. Keep RemoteViews
                     // below Binder's transaction limit by sending a small square crop.
@@ -164,9 +178,9 @@ abstract class VinylBaseWidgetProvider : AppWidgetProvider() {
                 R.id.widget_play_pause,
                 if (isPlaying) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play
             )
-            views.setInt(R.id.widget_play_pause, "setColorFilter", style.playTint)
-            views.setInt(R.id.widget_previous, "setColorFilter", style.controlTint)
-            views.setInt(R.id.widget_next, "setColorFilter", style.controlTint)
+            views.setInt(R.id.widget_play_pause, "setColorFilter", widgetAccent)
+            views.setInt(R.id.widget_previous, "setColorFilter", widgetAccent)
+            views.setInt(R.id.widget_next, "setColorFilter", widgetAccent)
 
             views.setOnClickPendingIntent(R.id.widget_root, openApp(context))
             views.setOnClickPendingIntent(R.id.widget_previous, action(context, id, VinylWidgetActionReceiver.PREVIOUS))

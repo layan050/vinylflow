@@ -15,6 +15,7 @@ import com.example.vinylflow.ui.player.PlayerScreen
 import com.example.vinylflow.ui.player.TabletPlayerScreen
 import com.example.vinylflow.ui.settings.SettingsScreen
 import com.example.vinylflow.ui.sources.SourcesScreen
+import com.example.vinylflow.widget.VinylBaseWidgetProvider
 import com.example.vinylflow.theme.VinylFlowTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -45,6 +46,11 @@ fun MainNavigation(activity: android.app.Activity) {
             darkMode = prefs.getBoolean("dark", false)
         ))
     }
+    val widgetPrefs = remember { activity.getSharedPreferences("vinylflow_widget", android.content.Context.MODE_PRIVATE) }
+    var widgetAccent by remember { mutableLongStateOf(widgetPrefs.getLong("accent", 0xFFB6AFFF)) }
+    var widgetSurface by remember { mutableLongStateOf(widgetPrefs.getLong("surface", 0xFF24242A)) }
+    var widgetShowControls by remember { mutableStateOf(widgetPrefs.getBoolean("controls", true)) }
+    var widgetShowArtist by remember { mutableStateOf(widgetPrefs.getBoolean("artist", true)) }
 
     // Auto-detect tablet (Xiaomi Pad 7 → Expanded width in landscape)
     val windowSizeClass = calculateWindowSizeClass(activity)
@@ -82,6 +88,19 @@ fun MainNavigation(activity: android.app.Activity) {
             entry<Dest.Customize> {
                 CustomizeScreen(
                     currentTheme  = theme,
+                    widgetAccent = widgetAccent,
+                    widgetSurface = widgetSurface,
+                    widgetShowControls = widgetShowControls,
+                    widgetShowArtist = widgetShowArtist,
+                    onWidgetAppearanceChange = { accent, surface, controls, artist ->
+                        widgetAccent = accent
+                        widgetSurface = surface
+                        widgetShowControls = controls
+                        widgetShowArtist = artist
+                        widgetPrefs.edit().putLong("accent", accent).putLong("surface", surface)
+                            .putBoolean("controls", controls).putBoolean("artist", artist).apply()
+                        VinylBaseWidgetProvider.updateAll(activity)
+                    },
                     onThemeChange = { newTheme ->
                         theme = newTheme
                         prefs.edit().putLong("background", newTheme.backgroundColor)

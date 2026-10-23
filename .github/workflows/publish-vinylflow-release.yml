@@ -22,7 +22,7 @@ jobs:
           RELEASE_TAG: v1.5.0
         run: |
           set -euo pipefail
-          notes="VinylFlow 1.5.0 adds full-bleed album artwork behind the rotating vinyl player and removes the legacy widgets. This APK update (build 9) enlarges the album cover and track details in the full-size iPod widget, adds a more compact iPod size, and replaces the APK assets on this release page. Also includes a cassette widget and rotating vinyl strip."
+          notes="VinylFlow 1.5.0 adds full-bleed album artwork behind the rotating vinyl player and removes the legacy widgets. This APK update (build 10) adds in-app widget customization with a live preview, color choices, and toggles for artist details and playback controls; it also includes the improved compact iPod widget. APK assets are updated on this release page. Also includes a cassette widget and rotating vinyl strip."
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             gh release upload "$RELEASE_TAG" dist/*.apk --clobber
             gh release edit "$RELEASE_TAG" --title "VinylFlow $RELEASE_TAG" --notes "$notes"
