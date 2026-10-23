@@ -4,6 +4,7 @@ import android.content.Intent
 import android.provider.Settings
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -14,6 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -115,21 +118,23 @@ private fun TabletMainLayout(
                 .background(Brush.linearGradient(if (theme.darkMode) listOf(Color(0xFF42434A), Color(0xFF292A30), Color(0xFF1F2025)) else listOf(Color(0xFFF4F4F2), Color(0xFFD0D3D6), Color(0xFFBFC2C6)))),
             contentAlignment = Alignment.Center
         ) {
-            VinylRecord(
-                isPlaying       = state.isPlaying,
-                artwork         = if (theme.showArtwork) track?.artworkBitmap else null,
-                recordColor     = Color(theme.recordColor),
-                grooveColor     = Color(theme.grooveColor),
-                labelColor      = Color(theme.labelColor),
-                accentColor     = accent,
-                showGrooves     = theme.showGrooves,
-                grooveIntensity = theme.grooveIntensity,
-                modifier        = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1f)
-            )
-            if (theme.showToneArm) {
-                ToneArm(isPlaying = state.isPlaying, armColor = Color(theme.toneArmColor))
+            Row(Modifier.fillMaxSize().padding(22.dp), verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.weight(0.38f).aspectRatio(1f).padding(end = 18.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(18.dp)).background(ink.copy(alpha = 0.08f)), contentAlignment = Alignment.Center) {
+                    val cover = if (theme.showArtwork) track?.artworkBitmap else null
+                    if (cover != null) Image(cover.asImageBitmap(), "Album cover", Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                    else Icon(Icons.Rounded.Album, null, tint = muted, modifier = Modifier.size(56.dp))
+                }
+                Box(Modifier.weight(0.62f).fillMaxHeight(), contentAlignment = Alignment.Center) {
+                    VinylRecord(
+                        isPlaying = state.isPlaying, artwork = null,
+                        labelTitle = track?.displayTitle.orEmpty(), labelArtist = track?.displayArtist.orEmpty(),
+                        recordColor = Color(theme.recordColor), grooveColor = Color(theme.grooveColor),
+                        labelColor = Color(theme.labelColor), accentColor = accent,
+                        showGrooves = theme.showGrooves, grooveIntensity = theme.grooveIntensity,
+                        modifier = Modifier.fillMaxHeight().aspectRatio(1f)
+                    )
+                    if (theme.showToneArm) ToneArm(isPlaying = state.isPlaying, armColor = Color(theme.toneArmColor))
+                }
             }
         }
 

@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.provider.Settings
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +22,7 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.*
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -162,7 +164,7 @@ private fun VinylPlayerConsole(
                 modifier = Modifier
                     .fillMaxWidth()
                     .widthIn(max = 430.dp)
-                    .aspectRatio(1f)
+                    .aspectRatio(1.24f)
                     .shadow(20.dp, RoundedCornerShape(30.dp))
                     .clip(RoundedCornerShape(30.dp))
                     .background(
@@ -173,36 +175,41 @@ private fun VinylPlayerConsole(
                     .border(1.dp, Color.White.copy(alpha = 0.88f), RoundedCornerShape(30.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    "33⅓ RPM",
-                    modifier = Modifier.align(Alignment.TopStart).padding(20.dp),
-                    color = Color(0xFF555860).copy(alpha = 0.75f),
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.3.sp
-                )
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.84f)
-                        .aspectRatio(1f)
-                        .shadow(15.dp, CircleShape)
-                        .background(if (theme.darkMode) Color(0xFF25262B) else Color(0xFFB2B5B9), CircleShape)
-                        .padding(5.dp),
-                    contentAlignment = Alignment.Center
+                Text("VINYLFLOW  ·  33⅓ RPM", modifier = Modifier.align(Alignment.TopStart).padding(start = 18.dp, top = 12.dp), color = Color(0xFF555860).copy(alpha = 0.75f), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
+                Row(
+                    Modifier.fillMaxSize().padding(start = 14.dp, end = 10.dp, top = 30.dp, bottom = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    VinylRecord(
-                        isPlaying = state.isPlaying,
-                        artwork = if (theme.showArtwork) track?.artworkBitmap else null,
-                        recordColor = Color(theme.recordColor),
-                        grooveColor = Color(theme.grooveColor),
-                        labelColor = Color(theme.labelColor),
-                        accentColor = accent,
-                        showGrooves = theme.showGrooves,
-                        grooveIntensity = theme.grooveIntensity,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                    if (theme.showToneArm) {
-                        ToneArm(isPlaying = state.isPlaying, armColor = Color(theme.toneArmColor))
+                    Box(
+                        Modifier.weight(0.39f).aspectRatio(1f).padding(end = 10.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(if (theme.darkMode) Color(0xFF28282E) else Color(0xFFE4E4E1))
+                            .border(1.dp, Color.White.copy(alpha = 0.55f), RoundedCornerShape(14.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        val cover = if (theme.showArtwork) track?.artworkBitmap else null
+                        if (cover != null) Image(cover.asImageBitmap(), "Album cover", Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                        else Icon(Icons.Rounded.Album, null, tint = muted.copy(alpha = 0.7f), modifier = Modifier.size(42.dp))
+                    }
+                    Box(Modifier.weight(0.61f).fillMaxHeight(), contentAlignment = Alignment.Center) {
+                        Box(
+                            Modifier.fillMaxHeight().aspectRatio(1f).shadow(15.dp, CircleShape)
+                                .background(if (theme.darkMode) Color(0xFF25262B) else Color(0xFFB2B5B9), CircleShape)
+                                .padding(4.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            VinylRecord(
+                                isPlaying = state.isPlaying,
+                                artwork = null,
+                                labelTitle = track?.displayTitle.orEmpty(),
+                                labelArtist = track?.displayArtist.orEmpty(),
+                                recordColor = Color(theme.recordColor), grooveColor = Color(theme.grooveColor),
+                                labelColor = Color(theme.labelColor), accentColor = accent,
+                                showGrooves = theme.showGrooves, grooveIntensity = theme.grooveIntensity,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                            if (theme.showToneArm) ToneArm(isPlaying = state.isPlaying, armColor = Color(theme.toneArmColor))
+                        }
                     }
                 }
                 Text(
@@ -436,6 +443,8 @@ fun VinylRecord(
     accentColor: Color,
     showGrooves: Boolean,
     grooveIntensity: Float,
+    labelTitle: String = "",
+    labelArtist: String = "",
     modifier: Modifier = Modifier
 ) {
     // Stop the motor where it is when paused; do not animate a hidden/idle record.
@@ -516,6 +525,24 @@ fun VinylRecord(
                 radius = labelR,
                 center = cx
             )
+        }
+
+        if (labelTitle.isNotBlank() || labelArtist.isNotBlank()) {
+            drawContext.canvas.nativeCanvas.let { native ->
+                val titlePaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                    color = if (artwork == null) android.graphics.Color.BLACK else android.graphics.Color.WHITE
+                    textAlign = android.graphics.Paint.Align.CENTER
+                    textSize = r * 0.082f
+                    typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.BOLD)
+                    setShadowLayer(r * 0.025f, 0f, r * 0.01f, android.graphics.Color.argb(130, 0, 0, 0))
+                }
+                val artistPaint = android.graphics.Paint(titlePaint).apply {
+                    textSize = r * 0.063f
+                    typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.NORMAL)
+                }
+                native.drawText(labelTitle.take(10), cx.x, cx.y + r * 0.08f, titlePaint)
+                native.drawText(labelArtist.take(14), cx.x, cx.y + r * 0.18f, artistPaint)
+            }
         }
 
         // Spindle hole

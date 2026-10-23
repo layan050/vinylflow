@@ -54,7 +54,7 @@ class MediaSessionRepository(private val context: Context) {
                 widgetAnimationRunning = false
                 return
             }
-            VinylBaseWidgetProvider.updateAll(context)
+            VinylBaseWidgetProvider.updateAll(context, spinningOnly = true)
             mainHandler.postDelayed(this, 500L)
         }
     }

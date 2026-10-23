@@ -28,12 +28,17 @@ enum class WidgetStyle(
     val label: Int,
     val accent: Int,
     val controlTint: Int,
-    val playTint: Int
+    val playTint: Int,
+    val recordMode: RecordMode = RecordMode.VINYL
 ) {
     MINI(R.layout.widget_vinyl_mini, R.string.widget_mini_name, 0xFF6055C8.toInt(), 0xFF4942A9.toInt(), Color.WHITE),
     PLAYER(R.layout.widget_vinyl, R.string.widget_player_name, 0xFFE58350.toInt(), 0xFF59483E.toInt(), Color.WHITE),
-    TURNTABLE(R.layout.widget_vinyl_turntable, R.string.widget_turntable_name, 0xFF5F62C9.toInt(), 0xFF30323A.toInt(), Color.WHITE)
+    TURNTABLE(R.layout.widget_vinyl_turntable, R.string.widget_turntable_name, 0xFF5F62C9.toInt(), 0xFF30323A.toInt(), Color.WHITE),
+    IPOD(R.layout.widget_vinyl_ipod, R.string.widget_ipod_name, 0xFFBFC3CC.toInt(), Color.WHITE, Color.WHITE, RecordMode.ALBUM_ART),
+    CASSETTE(R.layout.widget_vinyl_cassette, R.string.widget_cassette_name, 0xFFBFC3CC.toInt(), 0xFF25252A.toInt(), 0xFF17171B.toInt(), RecordMode.NONE)
 }
+
+enum class RecordMode { VINYL, ALBUM_ART, NONE }
 
 abstract class VinylBaseWidgetProvider : AppWidgetProvider() {
     protected abstract val widgetStyle: WidgetStyle
@@ -47,7 +52,9 @@ abstract class VinylBaseWidgetProvider : AppWidgetProvider() {
         private val widgetProviders = listOf(
             VinylMiniWidgetProvider::class.java,
             VinylPlayerWidgetProvider::class.java,
-            VinylTurntableWidgetProvider::class.java
+            VinylTurntableWidgetProvider::class.java,
+            VinylIpodWidgetProvider::class.java,
+            VinylCassetteWidgetProvider::class.java
         )
 
         fun hasWidgets(context: Context): Boolean {
@@ -57,15 +64,18 @@ abstract class VinylBaseWidgetProvider : AppWidgetProvider() {
             }
         }
 
-        fun updateAll(context: Context, rotationDegrees: Float = currentRotation()) {
+        fun updateAll(context: Context, rotationDegrees: Float = currentRotation(), spinningOnly: Boolean = false) {
             val manager = AppWidgetManager.getInstance(context)
             val controller = activeController(context)
-            widgetProviders.forEach { provider ->
+            val providersToUpdate = if (spinningOnly) widgetProviders.take(3) else widgetProviders
+            providersToUpdate.forEach { provider ->
                 val ids = manager.getAppWidgetIds(ComponentName(context, provider))
                 val style = when (provider) {
                     VinylMiniWidgetProvider::class.java -> WidgetStyle.MINI
                     VinylPlayerWidgetProvider::class.java -> WidgetStyle.PLAYER
-                    else -> WidgetStyle.TURNTABLE
+                    VinylTurntableWidgetProvider::class.java -> WidgetStyle.TURNTABLE
+                    VinylIpodWidgetProvider::class.java -> WidgetStyle.IPOD
+                    else -> WidgetStyle.CASSETTE
                 }
                 ids.forEach { updateWidget(context, manager, it, style, controller, rotationDegrees) }
             }
@@ -98,10 +108,11 @@ abstract class VinylBaseWidgetProvider : AppWidgetProvider() {
 
             val artwork = metadata?.getBitmap(MediaMetadata.METADATA_KEY_ART)
                 ?: metadata?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
-            views.setImageViewBitmap(
-                R.id.widget_record,
-                createSpinningRecord(artwork, rotationDegrees, style.accent)
-            )
+            when (style.recordMode) {
+                RecordMode.VINYL -> views.setImageViewBitmap(R.id.widget_record, createSpinningRecord(artwork, rotationDegrees, style.accent))
+                RecordMode.ALBUM_ART -> if (artwork != null && !artwork.isRecycled) views.setImageViewBitmap(R.id.widget_record, artwork) else views.setImageViewResource(R.id.widget_record, android.R.drawable.ic_menu_gallery)
+                RecordMode.NONE -> Unit
+            }
 
             val isPlaying = playback?.state == PlaybackState.STATE_PLAYING
             views.setImageViewResource(
@@ -210,6 +221,14 @@ class VinylPlayerWidgetProvider : VinylBaseWidgetProvider() {
 
 class VinylTurntableWidgetProvider : VinylBaseWidgetProvider() {
     protected override val widgetStyle = WidgetStyle.TURNTABLE
+}
+
+class VinylIpodWidgetProvider : VinylBaseWidgetProvider() {
+    protected override val widgetStyle = WidgetStyle.IPOD
+}
+
+class VinylCassetteWidgetProvider : VinylBaseWidgetProvider() {
+    protected override val widgetStyle = WidgetStyle.CASSETTE
 }
 
 class VinylWidgetActionReceiver : android.content.BroadcastReceiver() {

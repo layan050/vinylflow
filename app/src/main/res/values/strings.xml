@@ -6,4 +6,8 @@
     <string name="widget_player_description">A cream turntable player with track details and music controls. Resize it on your home screen.</string>
     <string name="widget_turntable_name">VinylFlow Turntable · Silver</string>
     <string name="widget_turntable_description">A large silver turntable with a spinning vinyl, tonearm and playback controls.</string>
+    <string name="widget_ipod_name">VinylFlow iPod</string>
+    <string name="widget_ipod_description">A classic pocket music player with album art and click-wheel controls. Resize for different home screen layouts.</string>
+    <string name="widget_cassette_name">VinylFlow Cassette</string>
+    <string name="widget_cassette_description">A retro cassette player showing the current track. Resize it to fit your home screen.</string>
 </resources>
